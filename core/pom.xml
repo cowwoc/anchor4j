@@ -4,11 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.github.cowwoc.anchor4j</groupId>
+		<groupId>io.github.cowwoc.anchor4j</groupId>
 		<artifactId>anchor4j</artifactId>
 		<version>0.10-SNAPSHOT</version>
 	</parent>
 	<artifactId>anchor4j-core</artifactId>
+	<name>anchor4j-core</name>
 
 	<properties>
 		<project.root.basedir>${project.parent.basedir}</project.root.basedir>
@@ -20,11 +21,11 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.github.cowwoc.requirements</groupId>
+			<groupId>io.github.cowwoc.requirements</groupId>
 			<artifactId>requirements-java</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.github.cowwoc.requirements</groupId>
+			<groupId>io.github.cowwoc.requirements</groupId>
 			<artifactId>requirements-jackson</artifactId>
 		</dependency>
 		<dependency>
@@ -38,14 +39,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

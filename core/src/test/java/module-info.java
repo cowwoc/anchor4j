@@ -1,10 +1,10 @@
 /**
  * Common test code.
  */
-module com.github.cowwoc.anchor4j.core.test
+module io.github.cowwoc.anchor4j.core.test
 {
-	requires com.github.cowwoc.anchor4j.core;
+	requires io.github.cowwoc.anchor4j.core;
 
-	exports com.github.cowwoc.anchor4j.core.test to
-		com.github.cowwoc.anchor4j.buildx.test, com.github.cowwoc.anchor4j.docker.test;
+	exports io.github.cowwoc.anchor4j.core.test to
+		io.github.cowwoc.anchor4j.buildx.test, io.github.cowwoc.anchor4j.docker.test;
 }

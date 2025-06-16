@@ -1,8 +1,8 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
-<suite name="TestSuite">
-	<test name="Tests">
+<suite name="TestSuite" parallel="methods" thread-count="15">
+	<test name="BuildX Tests">
 		<packages>
-			<package name="com.github.cowwoc.anchor4j.buildx.test.resource"/>
+			<package name="io.github.cowwoc.anchor4j.buildx.test.resource"/>
 		</packages>
 	</test>
 </suite>

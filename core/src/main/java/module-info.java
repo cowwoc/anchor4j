@@ -1,23 +1,25 @@
 /**
  * Common code.
  */
-module com.github.cowwoc.anchor4j.core
+module io.github.cowwoc.anchor4j.core
 {
 	requires transitive org.slf4j;
-	requires com.github.cowwoc.requirements11.java;
+	requires io.github.cowwoc.requirements12.java;
+	requires io.github.cowwoc.pouch.core;
 	requires com.fasterxml.jackson.databind;
-	requires com.github.cowwoc.pouch.core;
 
-	exports com.github.cowwoc.anchor4j.core.client;
-	exports com.github.cowwoc.anchor4j.core.resource;
-	exports com.github.cowwoc.anchor4j.core.exception;
+	exports io.github.cowwoc.anchor4j.core.client;
+	exports io.github.cowwoc.anchor4j.core.resource;
+	exports io.github.cowwoc.anchor4j.core.exception;
 
-	exports com.github.cowwoc.anchor4j.core.internal.client to
-		com.github.cowwoc.anchor4j.buildx, com.github.cowwoc.anchor4j.docker,
-		com.github.cowwoc.anchor4j.docker.test, com.github.cowwoc.anchor4j.buildx.test;
-	exports com.github.cowwoc.anchor4j.core.internal.util to
-		com.github.cowwoc.anchor4j.buildx, com.github.cowwoc.anchor4j.docker,
-		com.github.cowwoc.anchor4j.docker.test, com.github.cowwoc.anchor4j.buildx.test;
-	exports com.github.cowwoc.anchor4j.core.internal.resource to
-		com.github.cowwoc.anchor4j.buildx, com.github.cowwoc.anchor4j.docker;
+	exports io.github.cowwoc.anchor4j.core.internal.client to
+		io.github.cowwoc.anchor4j.buildx, io.github.cowwoc.anchor4j.docker,
+		io.github.cowwoc.anchor4j.docker.test, io.github.cowwoc.anchor4j.buildx.test,
+		io.github.cowwoc.anchor4j.core.test;
+	exports io.github.cowwoc.anchor4j.core.internal.resource to
+		io.github.cowwoc.anchor4j.buildx, io.github.cowwoc.anchor4j.docker,
+		io.github.cowwoc.anchor4j.docker.test, io.github.cowwoc.anchor4j.buildx.test;
+	exports io.github.cowwoc.anchor4j.core.internal.util to io.github.cowwoc.anchor4j.core.test,
+		io.github.cowwoc.anchor4j.buildx, io.github.cowwoc.anchor4j.buildx.test,
+		io.github.cowwoc.anchor4j.docker, io.github.cowwoc.anchor4j.docker.test;
 }

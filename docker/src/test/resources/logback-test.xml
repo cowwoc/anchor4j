@@ -6,32 +6,48 @@
 		<appender-ref ref="file"/>
 	</root>
 
-	<logger name="com.github.cowwoc.anchor4j.core.resource.DefaultBuildListener.stdout" additivity="false">
+	<logger name="io.github.cowwoc.anchor4j.docker.test.SmokeTest" level="info"/>
+	<logger name="io.github.cowwoc.anchor4j.docker.test.FailureLogger" level="info"/>
+
+	<logger name="io.github.cowwoc.anchor4j.core.resource.BuildListener.stdout" additivity="false">
 		<appender-ref ref="stdout"/>
+		<appender-ref ref="file"/>
 	</logger>
-	<logger name="com.github.cowwoc.anchor4j.core.resource.DefaultBuildListener.stderr" additivity="false">
+	<logger name="io.github.cowwoc.anchor4j.core.resource.BuildListener.stderr" additivity="false">
 		<appender-ref ref="stderr"/>
+		<appender-ref ref="file"/>
 	</logger>
-	<logger name="com.github.cowwoc.anchor4j.core.internal.client.AbstractInternalClient.stdout"
+	<logger name="io.github.cowwoc.anchor4j.core.internal.client.AbstractInternalClient.stdout"
 	        additivity="false">
 		<appender-ref ref="stdout"/>
+		<appender-ref ref="file"/>
 	</logger>
-	<logger name="com.github.cowwoc.anchor4j.core.internal.client.AbstractInternalClient.stderr"
+	<logger name="io.github.cowwoc.anchor4j.core.internal.client.AbstractInternalClient.stderr"
 	        additivity="false">
 		<appender-ref ref="stderr"/>
+		<appender-ref ref="file"/>
 	</logger>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>info</level>
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %class{36}.%method\(\) - %msg%n</pattern>
 		</encoder>
 	</appender>
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>info</level>
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level stdout: %msg%n</pattern>
 		</encoder>
 	</appender>
 	<appender name="stderr" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>info</level>
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level stderr: %msg%n</pattern>
 		</encoder>

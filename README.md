@@ -1,20 +1,24 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.cowwoc.anchor4j/anchor4j/badge.svg)](https://search.maven.org/search?q=g:com.github.cowwoc.anchor4j)
-[![build-status](https://github.com/cowwoc/anchor4j/actions/workflows/Build/badge.svg)](https://github.com/cowwoc/anchor4j/actions/?query=workflow%3Abuild)
+[![Maven Central](https://maven-badges.sml.io/maven-central/io.github.cowwoc.anchor4j/anchor4j/badge.svg)](https://search.maven.org/search?q=g:io.github.cowwoc.anchor4j)
+[![build-status](https://github.com/cowwoc/anchor4j/workflows/Build/badge.svg)](https://github.com/cowwoc/anchor4j/actions/?query=workflow%3Abuild)
 
-# <img src="docs/logo.svg" width=64 height=64 alt="logo"> Anchor4j
+# <img src="docs/logo.svg" width=64 height=64 alt="logo"> Anchor4J
 
 [![API](https://img.shields.io/badge/api_docs-5B45D5.svg)](https://cowwoc.github.io/anchor4j/0.10/)
 [![Changelog](https://img.shields.io/badge/changelog-A345D5.svg)](docs/changelog.md)
 
-A Java library for [Docker](https://www.docker.com/)
-and [Kubernetes](https://kubernetes.io/) [virtualization containers](https://en.wikipedia.org/wiki/Containerization_(computing)).
+A modern Java client for [Docker](https://www.docker.com/): fluent API, test-friendly, and Kubernetes-ready.
+
+✅ A fluent, strongly typed API.<br>
+✅ Support for building images with and without root access.<br>
+✅ Easy integration with CI and tests.<br>
+✅ First-class support for capturing stdout/stderr and process exit status.<br>
 
 To get started, add this Maven dependency:
 
 ```xml
 
 <dependency>
-  <groupId>com.github.cowwoc.anchor4j</groupId>
+  <groupId>io.github.cowwoc.anchor4j</groupId>
   <artifactId>anchor4j</artifactId>
   <version>0.10</version>
 </dependency>
@@ -23,7 +27,7 @@ To get started, add this Maven dependency:
 ## Example
 
 ```java
-import com.github.cowwoc.anchor4j.docker.client.Docker;
+import client.io.github.cowwoc.anchor4j.docker.Docker;
 
 import java.io.IOException;
 
@@ -33,12 +37,10 @@ class Example
     throws IOException, InterruptedException
   {
     Docker docker = Docker.connect();
-    docker.login("username", "Pa33word");
 
-    String id = docker.buildImage().
-      platform("linux/amd64").
+    String imageId = docker.buildImage().
       export(Exporter.dockerImage().build()).
-      build(Path.of("."));
+      build(".");
 
     docker.tagImage(id, "rocket-ship");
     docker.pushImage("rocket-ship").push();
@@ -64,16 +66,22 @@ please [open a new issue](issues/new).
 
 ## Licensing
 
-The `core` and `docker` modules are dual-licensed:
+The modules are dual-licensed:
 
-- ✅ [ModernJDK License](docs/modern-jdk-license.md) (free for users of the latest JDK):
-  - You may use, modify, and redistribute this software only when it is compiled for and executed on the
-    latest generally available (GA) Java Development Kit (JDK) version at the time of deployment.
+- ✅ [ModernJDK License](docs/modern-jdk-license-1.0.md) (free for personal use or small businesses):
+  - You may use, modify, and redistribute this software for free when:
+    - It is compiled for and executed on the latest generally available (GA) Java Development Kit (JDK)
+      version at the time of deployment.
+    - You are an individual or a company with 10 or fewer employees.
+    - You do not rebrand or white-label the software.
   - You are not required to update existing deployments when a newer JDK is released.
-- 💼 [Commercial License](docs/commercial-license.md) (for users requiring older JDK versions):
-  - For a commercial license without JDK restrictions, contact: `cowwoc2020@gmail.com`
 
-The `buildx` module is only available under the commercial license.
+- 💼 [Commercial License](docs/commercial-license-1.0.md):
+  - Required for:
+    - Compiling, running, or distributing the software for older (non-GA) JDK versions.
+    - Use by companies with more than 10 employees.
+    - White-labeling or rebranding the library in any form.
+    - 
 
 ## Dependencies
 

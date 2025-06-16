@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.github.cowwoc.anchor4j</groupId>
+	<groupId>io.github.cowwoc.anchor4j</groupId>
 	<artifactId>anchor4j</artifactId>
 	<version>0.10-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -14,8 +14,10 @@
 		<license>
 			<name>ModernJDK License v1.0</name>
 			<url>https://github.com/cowwoc/anchor4j/blob/main/docs/modern-jdk-license-1.0.md</url>
-			<distribution>repo</distribution>
-			<comments>Use restricted to latest GA JDK. See commercial license for broader use.</comments>
+		</license>
+		<license>
+			<name>Commercial License</name>
+			<url>https://github.com/cowwoc/anchor4j/blob/main/docs/commercial-license.md</url>
 		</license>
 	</licenses>
 	<organization>
@@ -55,7 +57,7 @@
 		<jackson.version>2.19.0</jackson.version>
 		<pmd.version>7.14.0</pmd.version>
 		<checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
-		<requirements.version>11.2</requirements.version>
+		<requirements.version>12.0</requirements.version>
 		<project.root.basedir>${project.basedir}</project.root.basedir>
 	</properties>
 
@@ -94,12 +96,12 @@
 				<version>1.5.18</version>
 			</dependency>
 			<dependency>
-				<groupId>com.github.cowwoc.requirements</groupId>
+				<groupId>io.github.cowwoc.requirements</groupId>
 				<artifactId>requirements-java</artifactId>
 				<version>${requirements.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.github.cowwoc.requirements</groupId>
+				<groupId>io.github.cowwoc.requirements</groupId>
 				<artifactId>requirements-jackson</artifactId>
 				<version>${requirements.version}</version>
 			</dependency>
@@ -248,23 +250,15 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.14.0</version>
-					<executions>
-						<execution>
-							<id>default-compile</id>
-							<goals>
-								<goal>compile</goal>
-							</goals>
-							<configuration>
-								<compilerArgs>
-									<arg>
-										-Xlint:all,-module,-requires-automatic,-requires-transitive-automatic,-missing-explicit-ctor
-									</arg>
-									<arg>-Xdiags:verbose</arg>
-									<arg>-Werror</arg>
-								</compilerArgs>
-							</configuration>
-						</execution>
-					</executions>
+					<configuration>
+						<compilerArgs>
+							<arg>
+								-Xlint:all,-module,-requires-automatic,-requires-transitive-automatic,-missing-explicit-ctor
+							</arg>
+							<arg>-Xdiags:verbose</arg>
+							<arg>-Werror</arg>
+						</compilerArgs>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -328,7 +322,7 @@
 					</executions>
 					<configuration>
 						<thirdPartyFilename>LICENSE-3RD-PARTY.md</thirdPartyFilename>
-						<fileTemplate>${project.root.basedir}/licenses/format.ftl</fileTemplate>
+						<fileTemplate>${project.root.basedir}/license-maven-plugin.ftl</fileTemplate>
 						<licenseMerges>
 							<licenseMerge>Apache License, Version 2.0|Apache 2.0|Apache-2.0|
 								Apache License, Version 2.0, GNU Lesser General Public License|

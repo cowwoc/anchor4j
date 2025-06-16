@@ -1,14 +1,14 @@
 /**
  * A buildx client.
  */
-module com.github.cowwoc.anchor4j.buildx
+module io.github.cowwoc.anchor4j.buildx
 {
-	requires transitive com.github.cowwoc.anchor4j.core;
-	requires com.github.cowwoc.requirements11.annotation;
-	requires com.github.cowwoc.requirements11.java;
+	requires transitive io.github.cowwoc.anchor4j.core;
+	requires io.github.cowwoc.requirements12.annotation;
+	requires io.github.cowwoc.requirements12.java;
+	requires io.github.cowwoc.pouch.core;
 	requires com.fasterxml.jackson.annotation;
-	requires com.github.cowwoc.pouch.core;
 
-	exports com.github.cowwoc.anchor4j.buildx.client;
-	exports com.github.cowwoc.anchor4j.buildx.internal.client to com.github.cowwoc.anchor4j.buildx.test;
+	exports io.github.cowwoc.anchor4j.buildx.client;
+	exports io.github.cowwoc.anchor4j.buildx.internal.client to io.github.cowwoc.anchor4j.buildx.test;
 }

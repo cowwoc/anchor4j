@@ -8,6 +8,8 @@
     * [requirements-jackson](https://github.com/cowwoc/requirements.java/requirements-jackson/)
     * [requirements-java](https://github.com/cowwoc/requirements.java/requirements-java/)
     * [java-diff-utils](https://github.com/java-diff-utils/java-diff-utils/java-diff-utils)
+  * Commercial License:
+    * [anchor4j-core](https://github.com/cowwoc/anchor4j/anchor4j-core/)
   * MIT License:
     * [SLF4J API Module](http://www.slf4j.org)
   * ModernJDK License v1.0:
