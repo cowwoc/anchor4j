@@ -52,7 +52,8 @@
 
 	<properties>
 		<maven.version>3.9.10</maven.version>
-		<maven.compiler.release>24</maven.compiler.release>
+		<maven.compiler.source>8</maven.compiler.source>
+		<maven.compiler.target>8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jackson.version>2.19.0</jackson.version>
 		<pmd.version>7.14.0</pmd.version>
@@ -220,7 +221,7 @@
 						</rulesets>
 						<analysisCache>true</analysisCache>
 						<linkXRef>false</linkXRef>
-						<targetJdk>${maven.compiler.release}</targetJdk>
+						<targetJdk>${maven.compiler.target}</targetJdk>
 					</configuration>
 					<executions>
 						<execution>
@@ -250,15 +251,54 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.14.0</version>
-					<configuration>
-						<compilerArgs>
-							<arg>
-								-Xlint:all,-module,-requires-automatic,-requires-transitive-automatic,-missing-explicit-ctor
-							</arg>
-							<arg>-Xdiags:verbose</arg>
-							<arg>-Werror</arg>
-						</compilerArgs>
-					</configuration>
+					<executions>
+						<execution>
+							<id>default-compile</id>
+							<goals>
+								<goal>compile</goal>
+							</goals>
+							<configuration>
+								<jdkToolchain>
+									<version>8</version>
+								</jdkToolchain>
+								<showDeprecation>true</showDeprecation>
+								<showWarnings>true</showWarnings>
+								<compilerArgs>
+									<arg>-Werror</arg>
+								</compilerArgs>
+								<excludes>
+									<exclude>module-info.java</exclude>
+								</excludes>
+							</configuration>
+						</execution>
+						<execution>
+							<id>compile-module-info</id>
+							<goals>
+								<goal>compile</goal>
+							</goals>
+							<configuration>
+								<release>9</release>
+								<jdkToolchain>
+									<version>9</version>
+								</jdkToolchain>
+								<compileSourceRoots>
+									<compileSourceRoot>${project.build.sourceDirectory}</compileSourceRoot>
+								</compileSourceRoots>
+								<includes>
+									<include>module-info.java</include>
+								</includes>
+								<multiReleaseOutput>true</multiReleaseOutput>
+								<showDeprecation>true</showDeprecation>
+								<showWarnings>true</showWarnings>
+								<compilerArgs>
+									<!--								-Xlint:all,-module,-requires-automatic,-requires-transitive-automatic,-missing-explicit-ctor-->
+									<arg>-Xlint:-requires-automatic</arg>
+									<arg>-Xdiags:verbose</arg>
+									<arg>-Werror</arg>
+								</compilerArgs>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
