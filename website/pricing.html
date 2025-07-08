@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Anchor4J Pricing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <h1 class="text-4xl font-bold text-center mb-6">Choose Your Plan</h1>
+  <p class="text-center text-lg text-gray-600 mb-12">
+    Select whether you are an individual or organization to see tailored pricing.
+  </p>
+
+  <!-- Step 1: User Type Selection -->
+  <div class="flex justify-center space-x-8 mb-12">
+    <button
+      id="btn-individual"
+      class="px-6 py-4 border rounded-lg text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 focus:outline-none"
+    >
+      Individual
+    </button>
+    <button
+      id="btn-organization"
+      class="px-6 py-4 border rounded-lg text-lg font-semibold bg-gray-200 hover:bg-gray-300 focus:outline-none"
+    >
+      Organization
+    </button>
+  </div>
+
+  <!-- Step 2: Pricing Grids -->
+
+  <!-- Individual Pricing: Free and Solo -->
+  <div
+    id="pricing-individual"
+    class="hidden grid grid-cols-1 md:grid-cols-2 gap-8"
+  >
+    <!-- Free Tier -->
+    <div class="bg-white shadow-xl rounded-2xl p-8 flex flex-col">
+      <h2 class="text-2xl font-semibold mb-4">Free</h2>
+      <p class="text-4xl font-bold mb-2">
+        $0<span class="text-base font-normal text-gray-500">/year</span>
+      </p>
+      <p class="text-gray-500 mb-6">
+        For personal, non-commercial use on the latest JDK version.
+      </p>
+      <ul class="space-y-2 mb-6 text-sm">
+        <li>✅ Full feature access</li>
+        <li>✅ JDK 24+ only</li>
+        <li>✅ Unlimited personal use</li>
+        <li>❌ No support</li>
+      </ul>
+      <a
+        href="https://cowwoc.github.io/anchor4j/start-free"
+        class="mt-auto bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded hover:bg-gray-300 text-center block"
+      >Get Started</a
+      >
+    </div>
+
+    <!-- Solo Tier -->
+    <div class="bg-white shadow-xl rounded-2xl p-8 flex flex-col">
+      <h2 class="text-2xl font-semibold mb-4">Solo</h2>
+      <p class="text-4xl font-bold mb-2">
+        $49<span class="text-base font-normal text-gray-500">/year</span>
+      </p>
+      <p class="text-gray-500 mb-6">
+        For individuals using older or LTS JDK versions.
+      </p>
+      <ul class="space-y-2 mb-6 text-sm">
+        <li>✅ Everything in Free</li>
+        <li><strong>💡 JDK 8+ support</strong></li>
+        <li>✅ Valid for all versions released during license period</li>
+        <li>❌ No support</li>
+      </ul>
+      <a
+        href="https://cowwoc.github.io/anchor4j/subscribe-solo"
+        class="mt-auto bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-900 text-center block"
+      >Buy License</a
+      >
+    </div>
+  </div>
+
+  <!-- Organization Pricing: Starter, Team, Enterprise -->
+  <div
+    id="pricing-organization"
+    class="hidden grid grid-cols-1 md:grid-cols-3 gap-8"
+  >
+    <!-- Starter Tier -->
+    <div class="bg-white shadow-xl rounded-2xl p-8 flex flex-col">
+      <h2 class="text-2xl font-semibold mb-4">Starter</h2>
+      <p class="text-4xl font-bold mb-2">
+        $999<span class="text-base font-normal text-gray-500">/year</span>
+      </p>
+      <p class="text-gray-500 mb-6">
+        For small teams automating infrastructure with Java.
+      </p>
+      <ul class="space-y-2 mb-6 text-sm">
+        <li>✅ Full feature set</li>
+        <li>✅ JDK 8+ support</li>
+        <li>✅ Valid for all versions released during license period</li>
+        <li><strong>💡 Commercial use for up to 5 users</strong></li>
+        <li>✅ Email support (no SLA)</li>
+      </ul>
+      <a
+        href="https://cowwoc.github.io/anchor4j/subscribe-starter"
+        class="mt-auto bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-900 text-center block"
+      >Buy</a
+      >
+    </div>
+
+    <!-- Team Tier -->
+    <div
+      class="bg-white shadow-2xl rounded-2xl p-8 border-4 border-blue-600 relative flex flex-col"
+    >
+      <div
+        class="absolute -top-4 right-4 bg-blue-600 text-white px-3 py-1 text-xs font-bold rounded-full"
+      >
+        Most Popular
+      </div>
+      <h2 class="text-2xl font-semibold mb-4">Team</h2>
+      <p class="text-4xl font-bold mb-2">
+        $2,500<span class="text-base font-normal text-gray-500">/year</span>
+      </p>
+      <p class="text-gray-500 mb-6">
+        For growing teams standardizing Java-based infra workflows.
+      </p>
+      <ul class="space-y-2 mb-6 text-sm">
+        <li>✅ Everything in Starter</li>
+        <li>✅ Up to 15 users</li>
+        <li><strong>💡 Private support channel (Slack or Discord)</strong></li>
+        <li>✅ Up to 2 hours onboarding</li>
+      </ul>
+      <a
+        href="https://cowwoc.github.io/anchor4j/subscribe-team"
+        class="mt-auto bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 text-center block"
+      >Buy</a
+      >
+    </div>
+
+    <!-- Enterprise Tier -->
+    <div class="bg-white shadow-xl rounded-2xl p-8 flex flex-col">
+      <h2 class="text-2xl font-semibold mb-2">Enterprise</h2>
+      <span class="text-sm text-gray-500 mb-1">Starting at</span>
+      <p class="text-4xl font-bold mb-2">
+        $5,000<span class="text-base font-normal text-gray-500">/year</span>
+      </p>
+      <p class="text-gray-500 mb-6">
+        For organizations requiring advanced governance and support.
+      </p>
+      <ul class="space-y-2 mb-6 text-sm">
+        <li>✅ Everything in Team</li>
+        <li>✅ 16+ users</li>
+        <li><strong>💡 SLA-backed support + Legal/compliance readiness</strong></li>
+        <li>✅ Up to 6 hours onboarding</li>
+        <li>✅ Legal review &amp; custom licensing</li>
+      </ul>
+      <a
+        href="https://cowwoc.github.io/anchor4j/contact-sales"
+        class="mt-auto bg-gray-800 text-white font-semibold py-2 px-4 rounded hover:bg-gray-900 text-center block"
+      >Contact Sales</a
+      >
+    </div>
+  </div>
+
+  <!-- License Version Rights Note -->
+  <div
+    id="license-note"
+    class="max-w-3xl mx-auto mt-12 text-center text-sm text-gray-500 hidden"
+  >
+    <p>
+      <strong>License Version Rights:</strong> Your license grants access to all
+      Anchor4J versions released during your active license period. After
+      expiration, you may continue using these versions but will not receive
+      updates or support.
+    </p>
+  </div>
+</div>
+
+<script>
+	const btnIndividual = document.getElementById("btn-individual");
+	const btnOrganization = document.getElementById("btn-organization");
+	const pricingIndividual = document.getElementById("pricing-individual");
+	const pricingOrganization = document.getElementById("pricing-organization");
+	const licenseNote = document.getElementById("license-note");
+
+	// Default to showing Individual pricing on page load (optional)
+	btnIndividual.classList.add("bg-blue-600", "text-white");
+	pricingIndividual.classList.remove("hidden");
+	licenseNote.classList.remove("hidden");
+
+	btnIndividual.addEventListener("click", () =>
+	{
+		pricingIndividual.classList.remove("hidden");
+		pricingOrganization.classList.add("hidden");
+		licenseNote.classList.remove("hidden");
+
+		btnIndividual.classList.add("bg-blue-600", "text-white");
+		btnIndividual.classList.remove("bg-gray-200");
+		btnOrganization.classList.remove("bg-blue-600", "text-white");
+		btnOrganization.classList.add("bg-gray-200");
+	});
+
+	btnOrganization.addEventListener("click", () =>
+	{
+		pricingOrganization.classList.remove("hidden");
+		pricingIndividual.classList.add("hidden");
+		licenseNote.classList.remove("hidden");
+
+		btnOrganization.classList.add("bg-blue-600", "text-white");
+		btnOrganization.classList.remove("bg-gray-200");
+		btnIndividual.classList.remove("bg-blue-600", "text-white");
+		btnIndividual.classList.add("bg-gray-200");
+	});
+</script>
+</body>
+</html>

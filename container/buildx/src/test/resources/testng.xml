@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="TestSuite" parallel="methods" thread-count="15">
+	<listeners>
+		<listener class-name="io.github.cowwoc.anchor4j.container.core.resource.test.WarnOnSlowTests"/>
+	</listeners>
+	<test name="BuildX Tests">
+		<packages>
+			<package name="io.github.cowwoc.anchor4j.container.buildx.test.resource"/>
+		</packages>
+	</test>
+</suite>

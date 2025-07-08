@@ -2,14 +2,10 @@ package io.github.cowwoc.anchor4j.core.internal.client;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.github.cowwoc.anchor4j.core.client.Client;
-import io.github.cowwoc.anchor4j.core.internal.resource.BuildXParser;
-import io.github.cowwoc.anchor4j.core.resource.CommandResult;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -23,50 +19,6 @@ public interface InternalClient extends Client
 	 * @return the configuration
 	 */
 	JsonMapper getJsonMapper();
-
-	/**
-	 * Returns a {@code ProcessBuilder} for running a command.
-	 *
-	 * @param arguments the command-line arguments to pass to the executable
-	 * @return the {@code ProcessBuilder}
-	 */
-	ProcessBuilder getProcessBuilder(List<String> arguments);
-
-	/**
-	 * Runs a command and returns its output.
-	 *
-	 * @param arguments the command-line arguments to pass to the executable
-	 * @param deadline  the absolute time by which the operation must succeed. The method will retry failed
-	 *                  operations while the current time is before this value.
-	 * @return the output of the command
-	 * @throws NullPointerException if any of the arguments are null
-	 * @throws IOException          if the executable could not be found
-	 * @throws InterruptedException if the thread was interrupted before the operation completed
-	 */
-	CommandResult run(List<String> arguments, Instant deadline) throws IOException, InterruptedException;
-
-	/**
-	 * Runs a command and returns its output.
-	 *
-	 * @param arguments the command-line arguments to pass to the executable
-	 * @param stdin     the bytes to pass into the command's stdin stream
-	 * @param deadline  the absolute time by which the operation must succeed. The method will retry failed
-	 *                  operations while the current time is before this value.
-	 * @return the output of the command
-	 * @throws NullPointerException if any of the arguments are null
-	 * @throws IOException          if the executable could not be found
-	 * @throws InterruptedException if the thread was interrupted before the operation completed
-	 */
-	CommandResult run(List<String> arguments, ByteBuffer stdin, Instant deadline)
-		throws IOException, InterruptedException;
-
-	/**
-	 * Invoked if a command fails.
-	 *
-	 * @param result the result of executing a command
-	 * @throws IOException if the failure is expected
-	 */
-	void commandFailed(CommandResult result) throws IOException;
 
 	/**
 	 * @return the maximum duration to retry a command that fails due to intermittent {@code IOException}s
@@ -102,9 +54,4 @@ public interface InternalClient extends Client
 	 */
 	<V> V retry(Operation<V> operation, Instant deadline)
 		throws IOException, InterruptedException, TimeoutException;
-
-	/**
-	 * @return a {@code BuildXParser}
-	 */
-	BuildXParser getBuildXParser();
 }

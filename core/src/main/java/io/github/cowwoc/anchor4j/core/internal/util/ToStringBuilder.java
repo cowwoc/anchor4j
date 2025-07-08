@@ -152,7 +152,9 @@ public final class ToStringBuilder
 			output.add(line.toString());
 		}
 		String name;
-		if (aClass != null)
+		if (aClass == null)
+			name = "";
+		else
 		{
 			Class<?> currentClass = aClass;
 			Deque<String> names = new ArrayDeque<>();
@@ -166,8 +168,6 @@ public final class ToStringBuilder
 				joiner.add(simpleName);
 			name = joiner.toString();
 		}
-		else
-			name = "";
 		if (output.length() == 0)
 			return name + ": {}";
 		return name + "\n" +

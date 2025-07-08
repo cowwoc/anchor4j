@@ -1,80 +1,150 @@
 package io.github.cowwoc.anchor4j.core.internal.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.cowwoc.anchor4j.core.internal.client.InternalClient;
+import io.github.cowwoc.requirements12.java.DefaultJavaValidators;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.regex.Pattern;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static io.github.cowwoc.requirements12.jackson.DefaultJacksonValidators.requireThat;
 
 /**
- * Common functionality shared by all parsers.
+ * Code shared by all parsers.
  */
 public abstract class AbstractParser
 {
-	/**
-	 * The network connection has been unexpectedly terminated.
-	 */
-	public static final Pattern CONNECTION_RESET = Pattern.compile("error during connect: " +
-		"[^ ]+ (\"[^\"]+\"): EOF");
-	// Known variants:
-	// failed to remove context ContainerIT.create: failed to remove metadata: remove C:\Users\Gili\.docker\contexts\meta\3f71ea6b1d70857e99ba7c2f25b1a5103c3ae9688a5485620732f10d0a255381\meta.json: The process cannot access the file because it is being used by another process.
-	// ERROR: failed to build: open C:\Users\Gili\.docker\contexts\meta\72510d5f6839cea902e7cb4bb977d0956dd2b4d68066afb70c280e0a6bb30c0f: The process cannot access the file because it is being used by another process.
-	public static final Pattern FILE_LOCKED = Pattern.compile("""
-		.* (open|remove) (\\S.*?): The process cannot access the file because it is being used by another \
-		process\\.""");
-	// Known variants:
-	// ERROR: failed to build: failed to read metadata: open C:\Users\Gili\.docker\contexts\meta\277f91ae09d6411b85f443e4ec9ae29e281bcf0815e8407f7bab2d88cfb61554\meta.json: Access is denied.
-	public static final Pattern ACCESS_DENIED = Pattern.compile(".* open (\\S.*?): Access is denied\\.");
+	protected final Logger log = LoggerFactory.getLogger(AbstractParser.class);
 
 	/**
-	 * Splits Strings on a {@code \n}.
-	 */
-	protected static final Pattern SPLIT_LINES = Pattern.compile("\n");
-	/**
-	 * Splits Strings on a {@code :}.
-	 */
-	protected static final Pattern SPLIT_ON_COLON = Pattern.compile(":");
-	/**
-	 * Splits Strings on a {@code @}.
-	 */
-	protected static final Pattern SPLIT_ON_AT_SIGN = Pattern.compile("@");
-	/**
-	 * Splits Strings on a {@code /}.
-	 */
-	protected static final Pattern SPLIT_ON_SLASH = Pattern.compile("/");
-	/**
-	 * The client configuration.
-	 */
-	private final InternalClient client;
-
-	/**
-	 * Creates a parser.
+	 * Returns the {@code int} value of a JSON node.
 	 *
-	 * @param client the client configuration
-	 */
-	public AbstractParser(InternalClient client)
-	{
-		assert client != null;
-		this.client = client;
-	}
-
-	/**
-	 * @return the client
-	 */
-	protected InternalClient getClient()
-	{
-		return client;
-	}
-
-	/**
-	 * Returns the value of a {@code boolean} child node.
-	 *
-	 * @param parent the parent node
+	 * @param parent a JSON node
 	 * @param name   the name of the child node
-	 * @return {@code false} if the child node was not found
+	 * @return the {@code int} value of the child node
+	 * @throws NullPointerException     if any of the arguments are null
+	 * @throws IllegalArgumentException if the child's value is not an integer or does not fit in an
+	 *                                  {@code int}
+	 */
+	public int getInt(JsonNode parent, String name)
+	{
+		JsonNode child = requireThat(parent, "parent").property(name).getValue();
+		requireThat(child, name).isIntegralNumber();
+		DefaultJavaValidators.requireThat(child.canConvertToInt(), name + ".canConvertToInt()").withContext(child,
+			"child").isTrue();
+		return child.intValue();
+	}
+
+	/**
+	 * Returns the {@code int} representation of a JSON string node.
+	 *
+	 * @param parent a JSON node
+	 * @param name   the name of the child node
+	 * @return the {@code int} representation of the child node
+	 * @throws NullPointerException     if any of the arguments are null
+	 * @throws IllegalArgumentException if the child's value is not a String or does not fit in an {@code int}
+	 */
+	public int stringToInt(JsonNode parent, String name)
+	{
+		JsonNode child = requireThat(parent, "parent").property(name).getValue();
+		requireThat(child, name).isString();
+		try
+		{
+			return Integer.parseInt(child.textValue());
+		}
+		catch (NumberFormatException e)
+		{
+			throw new IllegalArgumentException(name + " cannot be converted to an integer", e);
+		}
+	}
+
+	/**
+	 * Returns the {@code boolean} value of a JSON node.
+	 * <p>
+	 * If the child node does not exist, this method returns {@code false}.
+	 *
+	 * @param parent a JSON node
+	 * @param name   the name of the child node
+	 * @return the {@code boolean} value
+	 * @throws NullPointerException     if any of the arguments are null
+	 * @throws IllegalArgumentException if the child's value is not a boolean
 	 */
 	public boolean getBoolean(JsonNode parent, String name)
 	{
-		JsonNode childNode = parent.get(name);
-		return childNode != null && childNode.booleanValue();
+		JsonNode child = parent.get(name);
+		if (child == null)
+			return false;
+		requireThat(child, name).isBoolean();
+		return child.booleanValue();
+	}
+
+	/**
+	 * Returns the {@code List<T>} representation of a JSON array.
+	 *
+	 * @param <T>    the type of elements in the array
+	 * @param parent a JSON node
+	 * @param name   the name of the child node
+	 * @param mapper a function that transforms the server response into a list of elements
+	 * @return the {@code List<String>} value
+	 * @throws NullPointerException     if any of the arguments are null
+	 * @throws IllegalArgumentException if the child's value is not a {@code List<String>}
+	 */
+	public <T> List<T> toList(JsonNode parent, String name, JsonToObject<T> mapper)
+		throws IOException, InterruptedException
+	{
+		JsonNode arrayNode = parent.get(name);
+		if (arrayNode == null)
+			return List.of();
+		List<T> list = new ArrayList<>(arrayNode.size());
+		try
+		{
+			for (JsonNode element : arrayNode)
+				list.add(mapper.map(element));
+		}
+		catch (RuntimeException e)
+		{
+			log.warn("Response body: {}", arrayNode.toPrettyString(), e);
+			throw e;
+		}
+		return list;
+	}
+
+	/**
+	 * Returns the elements of a JSON array.
+	 *
+	 * @param <E>    the type to convert the elements into
+	 * @param parent a JSON node
+	 * @param name   the name of the child node
+	 * @param mapper a function that transforms the server response into a set of elements
+	 * @return the {@code Set<E>} value
+	 * @throws NullPointerException  if any of the arguments are null
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	public <E> Set<E> getElements(JsonNode parent, String name, JsonToObject<E> mapper)
+		throws IOException, InterruptedException
+	{
+		JsonNode arrayNode = parent.get(name);
+		if (arrayNode == null)
+			return Set.of();
+		Set<E> set = HashSet.newHashSet(arrayNode.size());
+		try
+		{
+			for (JsonNode element : arrayNode)
+				set.add(mapper.map(element));
+		}
+		catch (RuntimeException e)
+		{
+			log.warn("Response body: {}", arrayNode.toPrettyString(), e);
+			throw e;
+		}
+		return set;
 	}
 }

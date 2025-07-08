@@ -36,7 +36,7 @@ class Example
   public static void main(String[] args)
     throws IOException, InterruptedException
   {
-    Docker docker = Docker.connect();
+    DockerClient docker = DockerClient.build();
 
     String imageId = docker.buildImage().
       export(Exporter.dockerImage().build()).
@@ -66,7 +66,7 @@ please [open a new issue](issues/new).
 
 ## Licensing
 
-The modules are dual-licensed:
+This library is dual-licensed:
 
 - ✅ [ModernJDK License](docs/modern-jdk-license-1.0.md) (free for personal use or small businesses):
   - You may use, modify, and redistribute this software for free when:
@@ -81,7 +81,6 @@ The modules are dual-licensed:
     - Compiling, running, or distributing the software for older (non-GA) JDK versions.
     - Use by companies with more than 10 employees.
     - White-labeling or rebranding the library in any form.
-    - 
 
 ## Dependencies
 

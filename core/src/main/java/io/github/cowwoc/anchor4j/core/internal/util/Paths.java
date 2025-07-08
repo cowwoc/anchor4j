@@ -1,7 +1,5 @@
 package io.github.cowwoc.anchor4j.core.internal.util;
 
-import io.github.cowwoc.anchor4j.core.internal.client.Processes;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

@@ -1,239 +1,105 @@
-# ModernJDK License v1.0
+# ModernJDK License 1.1
 
-Copyright 2025 Gili Tzabari
-
-This license is based on the Apache License, Version 2.0, with additional restrictions.
-In the event of any conflict between these additional restrictions and the Apache License, the additional
-restrictions govern.
-
-## Additional Restrictions and Modifications to Apache License 2.0
-
-1. JDK Compatibility Restriction
-   - The Software may only be compiled or executed using the latest generally available (GA) release of the
-     Java Development Kit (JDK) at the time of deployment, as published by OpenJDK or Oracle.
-   - Users are not required to update existing deployments when newer JDK versions are released.
-   - All new deployments, distributions, or redistributions must target the then-current GA JDK version.
-   - Modifying the Software to enable compatibility with older or unsupported JDK versions is prohibited.
-
-2. Organizational Use Restriction  
-   This license applies only to individuals and organizations with 10 or fewer employees.
-
-3. Branding Restriction  
-   You may not white-label, rebrand, or remove or alter attribution notices without explicit written
-   permission.
-
-4. Redistribution of Modified Versions  
-   Redistribution is allowed only if all these restrictions and original license notices are preserved.
-
-5. License Termination  
-   Violation of any of these restrictions results in automatic termination of this license.
+**Effective Date:** 2025-06-27  
+**Applies To:** Anchor4J and all associated binaries and source code
 
 ---
 
-Below is the full text of the Apache License, Version 2.0, included verbatim for reference.
+## 1. Purpose
 
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+The **ModernJDK License** is designed to:
 
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+- Encourage adoption of modern Java runtimes by allowing free use of Anchor4J on the latest Java versions;
+- Prevent misuse of Anchor4J on outdated Java environments;
+- Allow open-source projects and small commercial users (≤10 employees) to freely use Anchor4J **without
+  affecting their own license**;
+- Require larger commercial users to purchase a commercial license.
 
-1. Definitions.
+This license applies only to **Anchor4J itself**. Projects that depend on Anchor4J may retain their own
+license (e.g., Apache 2.0, MIT, GPL, commercial), provided that:
 
-   "License" shall mean the terms and conditions for use, reproduction,
-   and distribution as defined by Sections 1 through 9 of this document.
-
-   "Licensor" shall mean the copyright owner or entity authorized by
-   the copyright owner that is granting the License.
-
-   "Legal Entity" shall mean the union of the acting entity and all
-   other entities that control, are controlled by, or are under common
-   control with that entity. For the purposes of this definition,
-   "control" means (i) the power, direct or indirect, to cause the
-   direction or management of such entity, whether by contract or
-   otherwise, or (ii) ownership of fifty percent (50%) or more of the
-   outstanding shares, or (iii) beneficial ownership of such entity.
-
-   "You" (or "Your") shall mean an individual or Legal Entity
-   exercising permissions granted by this License.
-
-   "Source" form shall mean the preferred form for making modifications,
-   including but not limited to software source code, documentation
-   source, and configuration files.
-
-   "Object" form shall mean any form resulting from mechanical
-   transformation or translation of a Source form, including but
-   not limited to compiled object code, generated documentation,
-   and conversions to other media types.
-
-   "Work" shall mean the work of authorship, whether in Source or
-   Object form, made available under the License, as indicated by a
-   copyright notice that is included in or attached to the work
-   (an example is provided in the Appendix below).
-
-   "Derivative Works" shall mean any work, whether in Source or Object
-   form, that is based on (or derived from) the Work and for which the
-   editorial revisions, annotations, elaborations, or other modifications
-   represent, as a whole, an original work of authorship. For the purposes
-   of this License, Derivative Works shall not include works that remain
-   separable from, or merely link (or bind by name) to the interfaces of,
-   the Work and Derivative Works thereof.
-
-   "Contribution" shall mean any work of authorship, including
-   the original version of the Work and any modifications or additions
-   to that Work or Derivative Works thereof, that is intentionally
-   submitted to Licensor for inclusion in the Work by the copyright owner
-   or by an individual or Legal Entity authorized to submit on behalf of
-   the copyright owner. For the purposes of this definition, "submitted"
-   means any form of electronic, verbal, or written communication sent
-   to the Licensor or its representatives, including but not limited to
-   communication on electronic mailing lists, source code control systems,
-   and issue tracking systems that are managed by, or on behalf of, the
-   Licensor for the purpose of discussing and improving the Work, but
-   excluding communication that is conspicuously marked or otherwise
-   designated in writing by the copyright owner as "Not a Contribution."
-
-   "Contributor" shall mean Licensor and any individual or Legal Entity
-   on behalf of whom a Contribution has been received by Licensor and
-   subsequently incorporated within the Work.
-
-2. Grant of Copyright License. Subject to the terms and conditions of
-   this License, each Contributor hereby grants to You a perpetual,
-   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-   copyright license to reproduce, prepare Derivative Works of,
-   publicly display, publicly perform, sublicense, and distribute the
-   Work and such Derivative Works in Source or Object form.
-
-3. Grant of Patent License. Subject to the terms and conditions of
-   this License, each Contributor hereby grants to You a perpetual,
-   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-   (except as stated in this section) patent license to make, have made,
-   use, offer to sell, sell, import, and otherwise transfer the Work,
-   where such license applies only to those patent claims licensable
-   by such Contributor that are necessarily infringed by their
-   Contribution(s) alone or by combination of their Contribution(s)
-   with the Work to which such Contribution(s) was submitted. If You
-   institute patent litigation against any entity (including a
-   cross-claim or counterclaim in a lawsuit) alleging that the Work
-   or a Contribution incorporated within the Work constitutes direct
-   or contributory patent infringement, then any patent licenses
-   granted to You under this License for that Work shall terminate
-   as of the date such litigation is filed.
-
-4. Redistribution. You may reproduce and distribute copies of the
-   Work or Derivative Works thereof in any medium, with or without
-   modifications, and in Source or Object form, provided that You
-   meet the following conditions:
-
-   (a) You must give any other recipients of the Work or
-   Derivative Works a copy of this License; and
-
-   (b) You must cause any modified files to carry prominent notices
-   stating that You changed the files; and
-
-   (c) You must retain, in the Source form of any Derivative Works
-   that You distribute, all copyright, patent, trademark, and
-   attribution notices from the Source form of the Work,
-   excluding those notices that do not pertain to any part of
-   the Derivative Works; and
-
-   (d) If the Work includes a "NOTICE" text file as part of its
-   distribution, then any Derivative Works that You distribute must
-   include a readable copy of the attribution notices contained
-   within such NOTICE file, excluding those notices that do not
-   pertain to any part of the Derivative Works, in at least one
-   of the following places: within a NOTICE text file distributed
-   as part of the Derivative Works; within the Source form or
-   documentation, if provided along with the Derivative Works; or,
-   within a display generated by the Derivative Works, if and
-   wherever such third-party notices normally appear. The contents
-   of the NOTICE file are for informational purposes only and
-   do not modify the License. You may add Your own attribution
-   notices within Derivative Works that You distribute, alongside
-   or as an addendum to the NOTICE text from the Work, provided
-   that such additional attribution notices cannot be construed
-   as modifying the License.
-
-   You may add Your own copyright statement to Your modifications and
-   may provide additional or different license terms and conditions
-   for use, reproduction, or distribution of Your modifications, or
-   for any such Derivative Works as a whole, provided Your use,
-   reproduction, and distribution of the Work otherwise complies with
-   the conditions stated in this License.
-
-5. Submission of Contributions. Unless You explicitly state otherwise,
-   any Contribution intentionally submitted for inclusion in the Work
-   by You to the Licensor shall be under the terms and conditions of
-   this License, without any additional terms or conditions.
-   Notwithstanding the above, nothing herein shall supersede or modify
-   the terms of any separate license agreement you may have executed
-   with Licensor regarding such Contributions.
-
-6. Trademarks. This License does not grant permission to use the trade
-   names, trademarks, service marks, or product names of the Licensor,
-   except as required for reasonable and customary use in describing the
-   origin of the Work and reproducing the content of the NOTICE file.
-
-7. Disclaimer of Warranty. Unless required by applicable law or
-   agreed to in writing, Licensor provides the Work (and each
-   Contributor provides its Contributions) on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-   implied, including, without limitation, any warranties or conditions
-   of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-   PARTICULAR PURPOSE. You are solely responsible for determining the
-   appropriateness of using or redistributing the Work and assume any
-   risks associated with Your exercise of permissions under this License.
-
-8. Limitation of Liability. In no event and under no legal theory,
-   whether in tort (including negligence), contract, or otherwise,
-   unless required by applicable law (such as deliberate and grossly
-   negligent acts) or agreed to in writing, shall any Contributor be
-   liable to You for damages, including any direct, indirect, special,
-   incidental, or consequential damages of any character arising as a
-   result of this License or out of the use or inability to use the
-   Work (including but not limited to damages for loss of goodwill,
-   work stoppage, computer failure or malfunction, or any and all
-   other commercial damages or losses), even if such Contributor
-   has been advised of the possibility of such damages.
-
-9. Accepting Warranty or Additional Liability. While redistributing
-   the Work or Derivative Works thereof, You may choose to offer,
-   and charge a fee for, acceptance of support, warranty, indemnity,
-   or other liability obligations and/or rights consistent with this
-   License. However, in accepting such obligations, You may act only
-   on Your own behalf and on Your sole responsibility, not on behalf
-   of any other Contributor, and only if You agree to indemnify,
-   defend, and hold each Contributor harmless for any liability
-   incurred by, or claims asserted against, such Contributor by reason
-   of your accepting any such warranty or additional liability.
-
-END OF TERMS AND CONDITIONS
-
-APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-Copyright [yyyy] [name of copyright owner]
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+- They do not modify or relicense Anchor4J,
+- They do not re-export or wrap Anchor4J’s API in an attempt to bypass this license or its JDK version
+  restrictions,
+- And, if commercial, they comply with the usage terms in Section 5.
 
 ---
 
-For questions about the license, contact: [cowwoc2020@gmail.com](mailto:cowwoc2020@gmail.com).
+## 2. License Grant
+
+You are granted a non-exclusive, non-transferable, non-sublicensable license to:
+
+- Use Anchor4J in source or binary form,
+- Include it as a dependency in your software,
+- Bundle it in compiled outputs (e.g., fat JARs, containers, native images),
+
+**provided that** your use complies with the restrictions described in Section 4 and (if applicable) Section
+5.
+
+---
+
+## 3. Scope of This License
+
+This license applies **solely to Anchor4J** ("the Software"), regardless of how it is obtained, embedded,
+bundled, shaded, or redistributed. The terms of this license continue to apply to the Software even when:
+
+- It is included within another project,
+- It is shaded or relocated using build tools,
+- It is packaged within a container or native executable.
+
+Redistribution of Anchor4J, whether standalone or bundled, must preserve this license in full and make it
+accessible to downstream users.
+
+---
+
+## 4. Restrictions
+
+The following conditions apply to all use and redistribution of the Software:
+
+1. **JDK Version Compliance**  
+   The Software may only be executed using a version of the Java Development Kit (JDK) that was the latest
+   generally available (GA) release at the time of the Software's original public release, or any newer
+   version.  
+   Use with older JDK versions is **prohibited**, unless explicitly licensed under separate commercial terms.
+
+2. **Modification**  
+   You may not modify the Software to circumvent this license or to allow execution on JDK versions not
+   covered by Section 4.1.
+
+3. **Attribution and Licensing**  
+   You must retain all copyright notices, license texts, and version metadata.  
+   You may not relicense or repackage the Software under any other terms.
+
+---
+
+## 5. Commercial Use Restriction
+
+Commercial use of Anchor4J is permitted under this license **only** if:
+
+- The organization using Anchor4J has **10 or fewer employees**, or
+- The use occurs within an open-source project as defined by
+  the [Open Source Definition](https://opensource.org/osd).
+
+Organizations with **more than 10 employees** must obtain a separate commercial license to use Anchor4J in
+production, regardless of whether it is bundled, linked, or used indirectly.
+
+“Commercial use” includes, but is not limited to:
+
+- Using Anchor4J in any internal or external business system,
+- Offering products or services that depend on Anchor4J (whether paid or free),
+- Using Anchor4J as part of consulting, integration, or deployment work.
+
+A valid commercial license allows commercial users to retain any license of their choice for their own
+software, **as long as they do not attempt to circumvent the terms of the commercial license** (e.g., via
+unauthorized redistribution, backporting, or API wrapping).
+
+---
+
+## 6. Downstream Works
+
+You may include Anchor4J as a dependency in your own software, whether open-source or proprietary, and your
+software ("Dependent Work") may retain its own license (e.g., Apache 2.0, MIT, GPL, commercial), **provided
+that**:
+
+- The Dependent Work does not modify or redistribute Anchor4J in a way that violates this license,
+- The Dependent Work is not designed or marketed primarily as a wrapper, adapter,
