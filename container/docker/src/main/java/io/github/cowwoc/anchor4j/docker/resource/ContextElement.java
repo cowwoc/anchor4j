@@ -3,10 +3,12 @@ package io.github.cowwoc.anchor4j.docker.resource;
 import io.github.cowwoc.anchor4j.docker.client.DockerClient;
 import io.github.cowwoc.anchor4j.docker.resource.Context.Id;
 
-import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
+import java.util.function.Predicate;
+
+import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.that;
 
 /**
- * An element returned by {@link DockerClient#listContexts()}.
+ * The properties used by the predicate in {@link DockerClient#getContexts(Predicate)}.
  *
  * @param id          the context's ID
  * @param current     {@code true} if this is the current user context
@@ -37,9 +39,9 @@ public record ContextElement(Id id, boolean current, String description, String 
 	 */
 	public ContextElement
 	{
-		requireThat(id, "id").isNotNull();
-		requireThat(description, "description").isStripped();
-		requireThat(endpoint, "endpoint").doesNotContainWhitespace().isNotEmpty();
-		requireThat(error, "error").isStripped();
+		assert id != null;
+		assert that(description, "description").isStripped().elseThrow();
+		assert that(endpoint, "endpoint").doesNotContainWhitespace().isNotEmpty().elseThrow();
+		assert that(error, "error").isStripped().elseThrow();
 	}
 }

@@ -11,7 +11,6 @@ import io.github.cowwoc.anchor4j.digitalocean.compute.internal.util.TimeLimit;
 import io.github.cowwoc.anchor4j.digitalocean.core.exception.ResourceNotFoundException;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.Kubernetes;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesCreator;
-import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesParser;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesVersion;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
@@ -303,8 +302,7 @@ public final class DefaultKubernetes implements Kubernetes
 		KubernetesParser parser = client.getParser();
 		if (!target.maintenanceSchedule().equals(maintenanceSchedule))
 		{
-			requestBody.set("maintenance_policy", parser.maintenanceScheduleToServer(client,
-				target.maintenanceSchedule()));
+			requestBody.set("maintenance_policy", parser.maintenanceScheduleToServer(target.maintenanceSchedule()));
 		}
 		if (target.autoUpgrade() != autoUpgrade)
 			requestBody.put("auto_upgrade", target.autoUpgrade());
@@ -380,7 +378,7 @@ public final class DefaultKubernetes implements Kubernetes
 			ContentResponse contentResponse = (ContentResponse) serverResponse;
 			JsonNode body = client.getResponseBody(contentResponse);
 			KubernetesParser parser = client.getParser();
-			Kubernetes newCluster = parser.kubernetesFromServer(client, body.get("kubernetes_cluster"));
+			Kubernetes newCluster = parser.kubernetesFromServer(body.get("kubernetes_cluster"));
 			if (newCluster.getStatus().state().equals(state))
 			{
 				if (timeOfLastStatus != Instant.MIN)

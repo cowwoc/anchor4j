@@ -2,8 +2,8 @@ package io.github.cowwoc.anchor4j.container.docker.test.resource;
 
 import io.github.cowwoc.anchor4j.container.docker.test.IntegrationTestContainer;
 import io.github.cowwoc.anchor4j.docker.client.DockerClient;
+import io.github.cowwoc.anchor4j.docker.resource.Context;
 import io.github.cowwoc.anchor4j.docker.resource.Context.Id;
-import io.github.cowwoc.anchor4j.docker.resource.ContextElement;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -29,11 +29,11 @@ public final class ContextIT
 	{
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
-		List<ContextElement> contexts = client.listContexts();
+		List<Context> contexts = client.getContexts();
 		boolean matchFound = false;
-		for (ContextElement element : contexts)
+		for (Context context : contexts)
 		{
-			if (element.id().getValue().equals(it.getName()))
+			if (context.getId().getValue().equals(it.getName()))
 			{
 				matchFound = true;
 				break;

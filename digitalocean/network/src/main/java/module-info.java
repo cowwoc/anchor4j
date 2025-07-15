@@ -13,5 +13,6 @@ module io.github.cowwoc.anchor4j.digitalocean.network
 	exports io.github.cowwoc.anchor4j.digitalocean.network.resource;
 
 	exports io.github.cowwoc.anchor4j.digitalocean.network.internal.resource to
-		io.github.cowwoc.anchor4j.digitalocean.compute, io.github.cowwoc.anchor4j.digitalocean.kubernetes;
+		io.github.cowwoc.anchor4j.digitalocean.compute, io.github.cowwoc.anchor4j.digitalocean.kubernetes,
+		io.github.cowwoc.anchor4j.digitalocean.database;
 }

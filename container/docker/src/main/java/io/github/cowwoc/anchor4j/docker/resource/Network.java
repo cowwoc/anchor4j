@@ -87,7 +87,7 @@ public interface Network
 	 * @param subnet  the network's subnet CIDR
 	 * @param gateway the network's gateway
 	 */
-	public record Configuration(String subnet, String gateway)
+	record Configuration(String subnet, String gateway)
 	{
 		/**
 		 * Creates a configuration.

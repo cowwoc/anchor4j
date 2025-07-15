@@ -33,8 +33,9 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -191,11 +192,11 @@ public abstract class AbstractDigitalOceanInternalClient extends AbstractInterna
 	}
 
 	@Override
-	public <T> Set<T> getElements(URI uri, Map<String, Collection<String>> parameters,
-		JsonToObject<Set<T>> mapper) throws IOException, InterruptedException
+	public <T> List<T> getElements(URI uri, Map<String, Collection<String>> parameters,
+		JsonToObject<List<T>> mapper) throws IOException, InterruptedException
 	{
 		ensureOpen();
-		Set<T> elements = new HashSet<>();
+		List<T> elements = new ArrayList<>();
 		do
 		{
 			JsonNode body = requestSinglePage(uri, parameters);
@@ -523,7 +524,7 @@ public abstract class AbstractDigitalOceanInternalClient extends AbstractInterna
 	 *
 	 * @throws IllegalStateException if the client is closed
 	 */
-	private void ensureOpen()
+	protected void ensureOpen()
 	{
 		if (isClosed())
 			throw new IllegalStateException("client was closed");

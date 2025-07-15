@@ -1,10 +1,10 @@
 package io.github.cowwoc.anchor4j.digitalocean.registry.internal.resource;
 
+import io.github.cowwoc.anchor4j.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
-import io.github.cowwoc.anchor4j.digitalocean.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.digitalocean.registry.internal.client.DefaultRegistryClient;
 import io.github.cowwoc.anchor4j.digitalocean.registry.resource.ContainerImage;
-import io.github.cowwoc.anchor4j.digitalocean.registry.resource.ContainerRepository;
+import io.github.cowwoc.anchor4j.digitalocean.registry.resource.Repository;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -15,7 +15,7 @@ import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.require
 public final class DefaultContainerImage implements ContainerImage
 {
 	private final DefaultRegistryClient client;
-	private final ContainerRepository repository;
+	private final Repository repository;
 	private final Id id;
 	private final Set<String> tags;
 	private final Set<Layer> layers;
@@ -31,7 +31,7 @@ public final class DefaultContainerImage implements ContainerImage
 	 * @throws NullPointerException     if any of the arguments are null
 	 * @throws IllegalArgumentException if {@code id} contains leading or trailing whitespace or is empty
 	 */
-	public DefaultContainerImage(DefaultRegistryClient client, ContainerRepository repository, Id id,
+	public DefaultContainerImage(DefaultRegistryClient client, Repository repository, Id id,
 		Set<String> tags, Set<Layer> layers)
 	{
 		assert client != null;
@@ -46,7 +46,7 @@ public final class DefaultContainerImage implements ContainerImage
 	}
 
 	@Override
-	public ContainerRepository getRepository()
+	public Repository getRepository()
 	{
 		return repository;
 	}
@@ -72,7 +72,7 @@ public final class DefaultContainerImage implements ContainerImage
 	@Override
 	public ContainerImage reload() throws IOException, InterruptedException
 	{
-		return repository.getImageByPredicate(image -> image.getId().equals(id));
+		return repository.getImage(image -> image.getId().equals(id));
 	}
 
 	@Override

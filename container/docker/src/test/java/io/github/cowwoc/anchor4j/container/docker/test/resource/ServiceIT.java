@@ -83,7 +83,7 @@ public final class ServiceIT
 			updateMonitor(Duration.ofSeconds(1)).apply();
 		try
 		{
-			worker.getClient().listTasksByService(service.getId());
+			worker.getClient().getTasksByService(service.getId());
 		}
 		catch (NotSwarmManagerException e)
 		{
@@ -107,7 +107,7 @@ public final class ServiceIT
 			runOnce().
 			apply();
 		Id workerNodeId = worker.getClient().getCurrentNodeId();
-		List<Task> tasksByNode = manager.getClient().listTasksByNode(workerNodeId);
+		List<Task> tasksByNode = manager.getClient().getTasksByNode(workerNodeId);
 		Instant deadline = Instant.now().plusSeconds(10);
 		Duration sleepDuration = Duration.ofMillis(100);
 		while (tasksByNode.isEmpty())
@@ -116,7 +116,7 @@ public final class ServiceIT
 			if (nextRetry.isAfter(deadline))
 				break;
 			Thread.sleep(sleepDuration);
-			tasksByNode = manager.getClient().listTasksByNode();
+			tasksByNode = manager.getClient().getTasksByNode();
 		}
 		requireThat(tasksByNode, "tasksByNode").isNotEmpty();
 		manager.onSuccess();
@@ -135,7 +135,7 @@ public final class ServiceIT
 			updateMonitor(Duration.ofSeconds(1)).apply();
 		try
 		{
-			worker.getClient().listTasksByNode();
+			worker.getClient().getTasksByNode();
 		}
 		catch (NotSwarmManagerException e)
 		{

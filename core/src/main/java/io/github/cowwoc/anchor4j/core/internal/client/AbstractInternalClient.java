@@ -1,6 +1,7 @@
 package io.github.cowwoc.anchor4j.core.internal.client;
 
 import io.github.cowwoc.anchor4j.core.client.Client;
+import io.github.cowwoc.anchor4j.core.migration.ResourceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
@@ -20,6 +23,8 @@ public abstract class AbstractInternalClient implements InternalClient
 {
 	private final static Duration SLEEP_DURATION = Duration.ofMillis(100);
 	protected Duration retryTimeout = Duration.ofSeconds(30);
+	private final Map<ResourceId, Object> sourceState = new HashMap<>();
+	private final Map<ResourceId, Object> targetState = new HashMap<>();
 	@SuppressWarnings("this-escape")
 	protected final Logger log = LoggerFactory.getLogger(AbstractInternalClient.class);
 
@@ -133,5 +138,28 @@ public abstract class AbstractInternalClient implements InternalClient
 		Thread.sleep(SLEEP_DURATION);
 		log.debug("Retrying after sleep");
 		return true;
+	}
+
+	/**
+	 * Returns a resource's expected state prior to applying a migration.
+	 *
+	 * @param id the resource ID
+	 * @return null if no match is found
+	 */
+	public Object getSourceState(ResourceId id)
+	{
+		return sourceState.get(id);
+	}
+
+	/**
+	 * Sets a resource's expected state for after a migration is applied.
+	 *
+	 * @param id    the resource ID
+	 * @param state the resource's state, or {@code null} if the resource is destroyed
+	 */
+	public void setTargetState(ResourceId id, Object state)
+	{
+		assert id != null;
+		targetState.put(id, state);
 	}
 }

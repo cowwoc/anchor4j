@@ -81,14 +81,11 @@ public interface ContainerImageBuilder
 	/**
 	 * Sets the builder instance to use for building the image.
 	 *
-	 * @param builder the name of the builder. The value must start with a letter, or digit, or underscore, and
-	 *                may be followed by additional characters consisting of letters, digits, underscores,
-	 *                periods or hyphens.
+	 * @param builder the builder
 	 * @return this
-	 * @throws NullPointerException     if {@code builder} is null
-	 * @throws IllegalArgumentException if {@code builder}'s format is invalid
+	 * @throws NullPointerException if {@code builder} is null
 	 */
-	ContainerImageBuilder builder(String builder);
+	ContainerImageBuilder builder(Builder.Id builder);
 
 	/**
 	 * Adds a build listener.

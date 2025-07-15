@@ -13,19 +13,24 @@ public final class DefaultService implements Service
 {
 	private final InternalDockerClient client;
 	private final Id id;
+	private final String name;
 
 	/**
 	 * Creates a reference to a service.
 	 *
 	 * @param client the client configuration
-	 * @param id     the ID of the container
+	 * @param id     the ID of the service
+	 * @param name   the name of the service
 	 */
-	public DefaultService(InternalDockerClient client, Id id)
+	public DefaultService(InternalDockerClient client, Id id, String name)
 	{
 		assert client != null;
 		assert id != null;
+		assert name != null;
+
 		this.client = client;
 		this.id = id;
+		this.name = name;
 	}
 
 	@Override
@@ -35,9 +40,15 @@ public final class DefaultService implements Service
 	}
 
 	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	@Override
 	public List<Task> listTasks() throws IOException, InterruptedException
 	{
-		return client.listTasksByService(id);
+		return client.getTasksByService(id);
 	}
 
 	@Override
@@ -57,6 +68,7 @@ public final class DefaultService implements Service
 	{
 		return new ToStringBuilder(DockerImage.class).
 			add("id", id).
+			add("name", name).
 			toString();
 	}
 }

@@ -4,7 +4,10 @@ import io.github.cowwoc.anchor4j.core.client.Client;
 
 import java.time.Duration;
 
-public interface DigitalOceanClient extends Client, AutoCloseable
+/**
+ * Functionality common to all DigitalOcean clients.
+ */
+public interface DigitalOceanClient extends Client
 {
 	/**
 	 * Sets the access token used for authentication.
@@ -35,10 +38,4 @@ public interface DigitalOceanClient extends Client, AutoCloseable
 	 * @return {@code true} if the client is closed
 	 */
 	boolean isClosed();
-
-	/**
-	 * Closes the client.
-	 */
-	@Override
-	void close();
 }

@@ -36,12 +36,12 @@ public final class DefaultDropletType implements DropletType
 	 *                          performance are comparable within the same vendor's environment.
 	 * @param diskInMiB         the amount of disk space allocated to this type, in GiB
 	 * @param transferInGiB     the amount of outgoing network traffic allocated to this type, in GiB
-	 * @param costPerHour       the hourly cost of this Droplet type in US dollars. This cost is incurred as
-	 *                          long as the Droplet is active and has not been destroyed.
-	 * @param costPerMonth      the monthly cost of this Droplet type in US dollars. This cost is incurred as
-	 *                          long as the Droplet is active and has not been destroyed.
-	 * @param regions           the regions where this type of Droplet may be created
-	 * @param available         {@code true} if Droplets may be created with this type, regardless of the
+	 * @param costPerHour       the hourly cost of this droplet type in US dollars. This cost is incurred as
+	 *                          long as the droplet is active and has not been destroyed.
+	 * @param costPerMonth      the monthly cost of this droplet type in US dollars. This cost is incurred as
+	 *                          long as the droplet is active and has not been destroyed.
+	 * @param regions           the regions where this type of droplet may be created
+	 * @param available         {@code true} if droplets may be created with this type, regardless of the
 	 *                          region
 	 * @param description       a description of this type. For example, Basic, General Purpose, CPU-Optimized,
 	 *                          Memory-Optimized, or Storage-Optimized.

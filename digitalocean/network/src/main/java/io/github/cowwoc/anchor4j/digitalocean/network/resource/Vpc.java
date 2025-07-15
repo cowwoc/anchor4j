@@ -8,7 +8,7 @@ import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.require
 /**
  * Represents a private network, also known as a Virtual Private Cloud (VPC).
  * <p>
- * VPCs are region-specific, meaning they cannot secure communication between Droplets located in different
+ * VPCs are region-specific, meaning they cannot secure communication between droplets located in different
  * regions.
  *
  * @see <a href="https://youtu.be/nbo5HrmZjXo?si=5Gf4hbticjw6nwph&t=2140">Configure a VPN to Extend a VPC

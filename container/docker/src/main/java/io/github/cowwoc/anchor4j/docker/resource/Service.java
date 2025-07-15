@@ -39,6 +39,13 @@ public interface Service
 	Id getId();
 
 	/**
+	 * Returns the service's name.
+	 *
+	 * @return the name
+	 */
+	String getName();
+
+	/**
 	 * Lists a service's tasks.
 	 *
 	 * @return the tasks

@@ -19,8 +19,9 @@ module io.github.cowwoc.anchor4j.container.core
 		io.github.cowwoc.anchor4j.container.core.test;
 	exports io.github.cowwoc.anchor4j.container.core.internal.util to io.github.cowwoc.anchor4j.container.core.test,
 		io.github.cowwoc.anchor4j.container.buildx, io.github.cowwoc.anchor4j.container.buildx.test,
-		io.github.cowwoc.anchor4j.container.docker, io.github.cowwoc.anchor4j.container.docker.test;
+		io.github.cowwoc.anchor4j.container.docker, io.github.cowwoc.anchor4j.container.docker.test, io.github.cowwoc.anchor4j.digitalocean.registry;
 	exports io.github.cowwoc.anchor4j.container.core.internal.resource to
 		io.github.cowwoc.anchor4j.container.buildx, io.github.cowwoc.anchor4j.container.buildx.test,
 		io.github.cowwoc.anchor4j.container.docker, io.github.cowwoc.anchor4j.container.docker.test;
+	exports io.github.cowwoc.anchor4j.container.core.internal.parser to io.github.cowwoc.anchor4j.container.buildx, io.github.cowwoc.anchor4j.container.buildx.test, io.github.cowwoc.anchor4j.container.docker, io.github.cowwoc.anchor4j.container.docker.test;
 }

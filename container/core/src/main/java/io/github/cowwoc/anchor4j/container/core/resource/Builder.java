@@ -5,6 +5,7 @@ import io.github.cowwoc.anchor4j.core.id.StringId;
 import io.github.cowwoc.requirements12.annotation.CheckReturnValue;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Represents a service that builds images.
@@ -41,18 +42,19 @@ public interface Builder
 	String getName();
 
 	/**
-	 * Returns the status of the builder.
+	 * Returns the nodes that the builder is on.
 	 *
-	 * @return the status
+	 * @return the nodes
 	 */
-	Status getStatus();
+	List<Node> getNodes();
 
 	/**
-	 * Returns an explanation of the builder's error status.
+	 * Returns the driver used by the builder.
 	 *
-	 * @return an empty string if the status is not {@code ERROR}
+	 * @return the driver
+	 * @see <a href="https://docs.docker.com/build/builders/drivers/">Build drivers</a>
 	 */
-	String getError();
+	Driver getDriver();
 
 	/**
 	 * Reloads the builder.
@@ -89,39 +91,133 @@ public interface Builder
 	}
 
 	/**
-	 * Represents the status of a builder.
-	 * <p>
-	 * <b>Thread Safety</b>: This class is immutable and thread-safe.
+	 * Represents a node that the builder is on.
 	 */
-	enum Status
+	interface Node
 	{
 		/**
-		 * The builder is defined but has not been created yet.
+		 * Creates a new ID.
+		 *
+		 * @param value the node's ID
+		 * @return the type-safe identifier for the resource
+		 * @throws NullPointerException     if {@code value} is null
+		 * @throws IllegalArgumentException if {@code value} contains whitespace or is empty
+		 */
+		static Node.Id id(String value)
+		{
+			return new Node.Id(value);
+		}
+
+		/**
+		 * Returns the node's ID.
+		 *
+		 * @return the ID
+		 */
+		Id getId();
+
+		/**
+		 * Returns the name of the node
+		 *
+		 * @return the name
+		 */
+		String getName();
+
+		/**
+		 * Returns the status of the node
+		 *
+		 * @return the status
+		 */
+		Status getStatus();
+
+		/**
+		 * Returns an explanation of the builder's error status.
+		 *
+		 * @return or an empty string if absent
+		 */
+		String getError();
+
+		/**
+		 * A type-safe identifier for this type of resource.
 		 * <p>
-		 * For example, this status can occur before the BuildKit image has been pulled locally and the builder
-		 * instance needs to be initialized.
+		 * This adds type-safety to API methods by ensuring that IDs specific to one class cannot be used in place
+		 * of IDs belonging to another class.
 		 */
-		INACTIVE,
+		final class Id extends StringId
+		{
+			/**
+			 * @param value the image's ID or {@link ContainerImage reference}
+			 * @throws NullPointerException     if {@code value} is null
+			 * @throws IllegalArgumentException if {@code value}'s format is invalid
+			 */
+			private Id(String value)
+			{
+				super(value);
+				ParameterValidator.validateImageIdOrReference(value, "value");
+			}
+		}
+
 		/**
-		 * The builder is in the process of starting up. Resources are being initialized, but it is not yet ready
-		 * to accept build jobs.
+		 * Represents the status of a builder on a node.
 		 */
-		STARTING,
+		enum Status
+		{
+			/**
+			 * The builder is defined but has not been created yet.
+			 * <p>
+			 * For example, this status can occur before the BuildKit image has been pulled locally and the builder
+			 * instance needs to be initialized.
+			 */
+			INACTIVE,
+			/**
+			 * The builder is in the process of starting up. Resources are being initialized, but it is not yet
+			 * ready to accept build jobs.
+			 */
+			STARTING,
+			/**
+			 * The builder is up and ready to accept jobs.
+			 */
+			RUNNING,
+			/**
+			 * The builder is in the process of shutting down. Active jobs may still be completing.
+			 */
+			STOPPING,
+			/**
+			 * The builder exists but is not currently running.
+			 */
+			STOPPED,
+			/**
+			 * The builder is unavailable due to an error.
+			 */
+			ERROR
+		}
+	}
+
+	/**
+	 * Represents the type of build driver responsible for executing build processes.
+	 * <p>
+	 * Drivers define how and where builds are performed. For example, a build may run directly on the local
+	 * Docker engine, inside a Docker container, in a Kubernetes cluster, or on a remote server.
+	 */
+	enum Driver
+	{
 		/**
-		 * The builder is up and ready to accept jobs.
+		 * Use the local Docker engine to execute builds.
 		 */
-		RUNNING,
+		DOCKER,
+
 		/**
-		 * The builder is in the process of shutting down. Active jobs may still be completing.
+		 * Use a Docker container as the build environment.
 		 */
-		STOPPING,
+		DOCKER_CONTAINER,
+
 		/**
-		 * The builder exists but is not currently running.
+		 * Use a Kubernetes cluster to orchestrate builds.
 		 */
-		STOPPED,
+		KUBERNETES,
+
 		/**
-		 * The builder is unavailable due to an error.
+		 * Use a remote build server or service.
 		 */
-		ERROR
+		REMOTE
 	}
 }

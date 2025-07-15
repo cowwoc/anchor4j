@@ -1,6 +1,7 @@
 package io.github.cowwoc.anchor4j.digitalocean.compute.internal.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.github.cowwoc.anchor4j.core.client.Client;
 import io.github.cowwoc.anchor4j.core.internal.resource.AbstractParser;
 import io.github.cowwoc.anchor4j.digitalocean.compute.internal.client.DefaultComputeClient;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.ComputeRegion;
@@ -11,6 +12,7 @@ import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType.DiskConfiguration;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType.GpuConfiguration;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.SshPublicKey;
+import io.github.cowwoc.anchor4j.digitalocean.network.internal.resource.NetworkParser;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region.Id;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
@@ -34,6 +36,25 @@ import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.require
  */
 public final class ComputeParser extends AbstractParser
 {
+	private final NetworkParser networkParser;
+
+	/**
+	 * Creates a ComputeParser.
+	 *
+	 * @param client the client configuration
+	 */
+	public ComputeParser(Client client)
+	{
+		super(client);
+		this.networkParser = new NetworkParser(client);
+	}
+
+	@Override
+	protected DefaultComputeClient getClient()
+	{
+		return (DefaultComputeClient) client;
+	}
+
 	/**
 	 * Convert a DropletFeature from its server representation.
 	 *
@@ -134,7 +155,7 @@ public final class ComputeParser extends AbstractParser
 			BigDecimal transferInGiB = json.get("transfer").decimalValue().multiply(TIB_TO_GIB);
 			BigDecimal costPerHour = json.get("price_hourly").decimalValue();
 			BigDecimal costPerMonth = json.get("price_monthly").decimalValue();
-			Set<Id> regions = getElements(json, "regions", this::regionIdFromServer);
+			Set<Id> regions = getElements(json, "regions", networkParser::regionIdFromServer);
 			boolean available = getBoolean(json, "available");
 			String description = json.get("description").textValue();
 			Set<DiskConfiguration> diskConfiguration = getElements(json, "disk_info",
@@ -158,14 +179,12 @@ public final class ComputeParser extends AbstractParser
 	/**
 	 * Convert a Droplet from its server representation.
 	 *
-	 * @param client the client configuration
-	 * @param json   the JSON representation
+	 * @param json the JSON representation
 	 * @return the droplet
 	 * @throws NullPointerException     if any of the arguments are null
 	 * @throws IllegalArgumentException if the server response could not be parsed
-	 * @throws IllegalStateException    if the client is closed
 	 */
-	public Droplet dropletFromServer(DefaultComputeClient client, JsonNode json)
+	public Droplet dropletFromServer(JsonNode json)
 	{
 		// https://docs.digitalocean.com/reference/api/api-reference/#operation/droplets_get
 		Droplet.Id id = Droplet.id(getInt(json, "id"));
@@ -175,7 +194,7 @@ public final class ComputeParser extends AbstractParser
 
 		DropletImage image = dropletImageFromServer(json.get("image"));
 		JsonNode regionNode = json.get("region");
-		Region.Id region = regionIdFromServer(regionNode.get("slug"));
+		Region.Id region = networkParser.regionIdFromServer(regionNode.get("slug"));
 		JsonNode featuresNode = json.get("features");
 		Set<String> featureSet = new HashSet<>();
 		featuresNode.forEach(element -> featureSet.add(element.textValue()));
@@ -207,7 +226,7 @@ public final class ComputeParser extends AbstractParser
 		try
 		{
 			Set<String> tags = getElements(json, "tags", JsonNode::textValue);
-			return new DefaultDroplet(client, id, name, type, image, region, vpc, addresses, features, tags,
+			return new DefaultDroplet(getClient(), id, name, type, image, region, vpc, addresses, features, tags,
 				createdAt);
 		}
 		catch (IOException | InterruptedException e)
@@ -215,56 +234,6 @@ public final class ComputeParser extends AbstractParser
 			// Exceptions never thrown by JsonNode::textValue
 			throw new AssertionError(e);
 		}
-	}
-
-	/**
-	 * Convert a Region.Id from its server representation.
-	 *
-	 * @param json the JSON representation
-	 * @return the ID of the region
-	 * @throws NullPointerException     if {@code json} is null
-	 * @throws IllegalArgumentException if the server response could not be parsed
-	 */
-	public Id regionIdFromServer(JsonNode json)
-	{
-		String value = json.get("region").textValue();
-		return switch (value)
-		{
-			case "nyc" -> Id.NEW_YORK;
-			case "ams" -> Id.AMSTERDAM;
-			case "sfo" -> Id.SAN_FRANCISCO;
-			case "sgp" -> Id.SINGAPORE;
-			case "lon" -> Id.LONDON;
-			case "fra" -> Id.FRANCE;
-			case "tor" -> Id.TORONTO;
-			case "blr" -> Id.BANGALORE;
-			case "syd" -> Id.SYDNEY;
-			default -> throw new IllegalArgumentException("Unsupported value: " + value);
-		};
-	}
-
-	/**
-	 * Convert a Region.Id to its server representation.
-	 *
-	 * @param value the ID of the region
-	 * @return the server representation
-	 * @throws NullPointerException     if {@code json} is null
-	 * @throws IllegalArgumentException if the server response could not be parsed
-	 */
-	public String regionIdToServer(Region.Id value)
-	{
-		return switch (value)
-		{
-			case NEW_YORK -> "nyc";
-			case AMSTERDAM -> "ams";
-			case SAN_FRANCISCO -> "sfo";
-			case SINGAPORE -> "sgp";
-			case LONDON -> "lon";
-			case FRANCE -> "fra";
-			case TORONTO -> "tor";
-			case BANGALORE -> "blr";
-			case SYDNEY -> "syd";
-		};
 	}
 
 	/**
@@ -283,10 +252,10 @@ public final class ComputeParser extends AbstractParser
 			String distribution = json.get("distribution").textValue();
 			String slug = json.get("slug").textValue();
 			boolean isPublic = getBoolean(json, "public");
-			Set<Region.Id> regions = getElements(json, "regions", this::regionIdFromServer);
+			Set<Region.Id> regions = getElements(json, "regions", networkParser::regionIdFromServer);
 			DropletImage.Type type = dropletImageTypeFromServer(json.get("type"));
 			int minDiskSizeInGiB = json.get("min_disk_size").intValue();
-			int sizeInGiB = json.get("size_gigabytes").intValue();
+			float sizeInGiB = json.get("size_gigabytes").floatValue();
 			String description = json.get("description").textValue();
 			Set<String> tags = getElements(json, "tags", JsonNode::textValue);
 			DropletImage.Status status = dropletImageStatusFromServer(json.get("status"));
@@ -331,19 +300,17 @@ public final class ComputeParser extends AbstractParser
 	/**
 	 * Convert a SshPublicKey from its server representation.
 	 *
-	 * @param client the client configuration
-	 * @param json   the JSON representation
+	 * @param json the JSON representation
 	 * @return the SSH public key
 	 * @throws NullPointerException     if any of the arguments are null
 	 * @throws IllegalArgumentException if the server response could not be parsed
-	 * @throws IllegalStateException    if the client is closed
 	 */
-	public SshPublicKey sshPublicKeyFromServer(DefaultComputeClient client, JsonNode json)
+	public SshPublicKey sshPublicKeyFromServer(JsonNode json)
 	{
 		SshPublicKey.Id id = SshPublicKey.id(getInt(json, "id"));
 		String name = json.get("name").textValue();
 		String fingerprint = json.get("fingerprint").textValue();
-		return new DefaultSshPublicKey(client, id, name, fingerprint);
+		return new DefaultSshPublicKey(getClient(), id, name, fingerprint);
 	}
 
 	/**
@@ -357,7 +324,7 @@ public final class ComputeParser extends AbstractParser
 	public ComputeRegion regionFromServer(JsonNode json)
 	{
 		String name = json.get("name").textValue();
-		Region.Id id = regionIdFromServer(json.get("slug"));
+		Region.Id id = networkParser.regionIdFromServer(json.get("slug"));
 		try
 		{
 			Set<ComputeRegion.Feature> features = getElements(json, "features", this::regionFeatureFromServer);

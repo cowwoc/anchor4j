@@ -130,12 +130,8 @@ public final class SwarmIT
 		Node workerNode = manager.getClient().getNode(workerNodeState.getId());
 		workerNode.remove().force().apply();
 
-		Node managerNodeState = manager.getClient().getCurrentNode();
-		NodeElement nodeElement = new NodeElement(managerNodeState.getId(), managerNodeState.getHostname(),
-			managerNodeState.getRole(), managerNodeState.isLeader(), managerNodeState.getStatus(),
-			managerNodeState.getReachability(), managerNodeState.getAvailability(),
-			managerNodeState.getDockerVersion());
-		requireThat(manager.getClient().listNodes(), "nodes").containsExactly(List.of(nodeElement));
+		Node managerNode = manager.getClient().getCurrentNode();
+		requireThat(manager.getClient().getNodes(), "nodes").isEqualTo(List.of(managerNode));
 		manager.onSuccess();
 		worker.onSuccess();
 	}
@@ -155,12 +151,8 @@ public final class SwarmIT
 		workerNode.remove().force().apply();
 		workerNode.remove().apply();
 
-		Node managerNodeState = manager.getClient().getCurrentNode();
-		NodeElement nodeElement = new NodeElement(managerNodeState.getId(), managerNodeState.getHostname(),
-			managerNodeState.getRole(), managerNodeState.isLeader(), managerNodeState.getStatus(),
-			managerNodeState.getReachability(), managerNodeState.getAvailability(),
-			managerNodeState.getDockerVersion());
-		requireThat(manager.getClient().listNodes(), "nodes").containsExactly(List.of(nodeElement));
+		Node managerNode = manager.getClient().getCurrentNode();
+		requireThat(manager.getClient().getNodes(), "nodes").isEqualTo(List.of(managerNode));
 		manager.onSuccess();
 		worker.onSuccess();
 	}

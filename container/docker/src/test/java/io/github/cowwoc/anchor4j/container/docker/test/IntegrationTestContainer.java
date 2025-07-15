@@ -1,10 +1,12 @@
 package io.github.cowwoc.anchor4j.container.docker.test;
 
-import io.github.cowwoc.anchor4j.container.core.resource.Builder.Status;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder.Node.Status;
 import io.github.cowwoc.anchor4j.docker.client.DockerClient;
 import io.github.cowwoc.anchor4j.docker.internal.client.InternalDockerClient;
 import io.github.cowwoc.anchor4j.docker.resource.Container;
 import io.github.cowwoc.anchor4j.docker.resource.ContainerCreator.PortBindingBuilder;
+import io.github.cowwoc.anchor4j.docker.resource.Context;
 import io.github.cowwoc.anchor4j.docker.resource.ContextEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,13 +187,13 @@ public class IntegrationTestContainer
 		// https://github.com/docker-library/docker/blob/a89fda523324cef5da11eed61c397347e1435edd/dockerd-entrypoint.sh#L75
 
 		Instant deadline = Instant.now().plus(client.getRetryTimeout());
-		client.retry(_ ->
+		Context context = client.retry(_ ->
 		{
-			client.createContext(name, endpoint).apply();
-			client.setClientContext(name);
-			return null;
+			Context candidate = client.createContext(name, endpoint).apply();
+			client.setClientContext(candidate.getId());
+			return candidate;
 		}, deadline);
-		client.waitUntilBuilderStatus(Status.RUNNING, deadline);
+		client.waitUntilBuilderStatus(Builder.id(context.getId().getValue()), Status.RUNNING, deadline);
 	}
 
 	/**

@@ -22,8 +22,8 @@ public final class DefaultComputeRegion implements ComputeRegion
 	 * @param id                the region's ID
 	 * @param name              the name of this region
 	 * @param features          features that are available in this region
-	 * @param canCreateDroplets {@code true} if new Droplets can be created in this region
-	 * @param dropletTypes      the types of Droplets that can be created in this region
+	 * @param canCreateDroplets {@code true} if new droplets can be created in this region
+	 * @param dropletTypes      the types of droplets that can be created in this region
 	 * @throws NullPointerException     if any of the arguments are null
 	 * @throws IllegalArgumentException if {@code name} contains leading or trailing whitespace or is empty
 	 */
@@ -68,6 +68,12 @@ public final class DefaultComputeRegion implements ComputeRegion
 	public boolean canCreateDroplets()
 	{
 		return canCreateDroplets;
+	}
+
+	@Override
+	public Set<DropletType.Id> getDropletTypes()
+	{
+		return dropletTypes;
 	}
 
 	@Override

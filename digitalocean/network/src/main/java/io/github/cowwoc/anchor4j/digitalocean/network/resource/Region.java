@@ -22,40 +22,64 @@ public interface Region
 	enum Id
 	{
 		/**
-		 * New York, United States.
+		 * Atlanta, United States, data center 1.
 		 */
-		NEW_YORK,
+		ATLANTA1,
 		/**
-		 * Amsterdam, Netherlands.
+		 * New York, United States, data center 1.
 		 */
-		AMSTERDAM,
+		NEW_YORK1,
 		/**
-		 * San Francisco, United States.
+		 * New York, United States, data center 2.
 		 */
-		SAN_FRANCISCO,
+		NEW_YORK2,
 		/**
-		 * Singapore, Singapore.
+		 * New York, United States, data center 3.
 		 */
-		SINGAPORE,
+		NEW_YORK3,
 		/**
-		 * London, United Kingdom.
+		 * San Francisco, United States, data center 1.
 		 */
-		LONDON,
+		SAN_FRANCISCO1,
 		/**
-		 * Frankfurt, Germany.
+		 * San Francisco, United States, data center 2.
 		 */
-		FRANCE,
+		SAN_FRANCISCO2,
 		/**
-		 * Toronto, Canada.
+		 * San Francisco, United States, data center 3.
 		 */
-		TORONTO,
+		SAN_FRANCISCO3,
 		/**
-		 * Bangalore, India.
+		 * Amsterdam, Netherlands, data center 2.
 		 */
-		BANGALORE,
+		AMSTERDAM2,
 		/**
-		 * Sydney, Australia.
+		 * Amsterdam, Netherlands, data center 3.
 		 */
-		SYDNEY
+		AMSTERDAM3,
+		/**
+		 * Singapore, Singapore, data center 1.
+		 */
+		SINGAPORE1,
+		/**
+		 * London, United Kingdom, data center 1.
+		 */
+		LONDON1,
+		/**
+		 * Frankfurt, Germany, data center 1.
+		 */
+		FRANCE1,
+		/**
+		 * Toronto, Canada, data center 1.
+		 */
+		TORONTO1,
+		/**
+		 * Bangalore, India, data center 1.
+		 */
+		BANGALORE1,
+		/**
+		 * Sydney, Australia, data center 1.
+		 */
+		SYDNEY1;
 	}
 }

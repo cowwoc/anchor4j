@@ -25,23 +25,25 @@ public final class DefaultContext implements Context
 	 * @param description the context's description
 	 * @param endpoint    the configuration of the target Docker Engine
 	 * @throws NullPointerException     if any of the arguments are null
-	 * @throws IllegalArgumentException if:
-	 *                                  <ul>
-	 *                                    <li>any of the arguments contain whitespace.</li>
-	 *                                    <li>{@code name} or {@code endpoint} are empty.</li>
-	 *                                  </ul>
+	 * @throws IllegalArgumentException if {@code endpoint} contains whitespace or is empty
 	 */
 	public DefaultContext(DockerClient client, Id id, String description, String endpoint)
 	{
 		requireThat(client, "client").isNotNull();
 		requireThat(id, "id").isNotNull();
-		requireThat(description, "description").doesNotContainWhitespace();
+		requireThat(description, "description").isNotNull();
 		requireThat(endpoint, "endpoint").doesNotContainWhitespace().isNotEmpty();
 
 		this.client = client;
 		this.id = id;
 		this.description = description;
 		this.endpoint = endpoint;
+	}
+
+	@Override
+	public Id getId()
+	{
+		return id;
 	}
 
 	@Override

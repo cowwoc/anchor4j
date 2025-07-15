@@ -1,5 +1,6 @@
 package io.github.cowwoc.anchor4j.digitalocean.compute.client;
 
+import io.github.cowwoc.anchor4j.core.migration.DriftDetection;
 import io.github.cowwoc.anchor4j.digitalocean.compute.internal.client.DefaultComputeClient;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.ComputeRegion;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.Droplet;
@@ -10,11 +11,12 @@ import io.github.cowwoc.anchor4j.digitalocean.compute.resource.SshPublicKey;
 import io.github.cowwoc.anchor4j.digitalocean.core.client.DigitalOceanClient;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
+import io.github.cowwoc.requirements12.annotation.CheckReturnValue;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -25,32 +27,21 @@ public interface ComputeClient extends DigitalOceanClient
 	/**
 	 * Returns a client.
 	 *
+	 * @param driftDetection the drift detection configuration
 	 * @return the client
-	 * @throws IOException if an I/O error occurs while building the client
+	 * @throws NullPointerException if {@code driftDetection} is null
+	 * @throws IOException          if an I/O error occurs while building the client
 	 */
-	static ComputeClient build() throws IOException
+	static ComputeClient build(DriftDetection driftDetection) throws IOException
 	{
-		return new DefaultComputeClient();
+		return new DefaultComputeClient(driftDetection);
 	}
 
 	/**
-	 * Returns the available regions.
-	 *
-	 * @param canCreateDroplets {@code true} if the returned types must be able to create Droplets
-	 * @return an empty set if no match is found
-	 * @throws IllegalStateException if the client is closed
-	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
-	 *                               the request may resolve the issue.
-	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
-	 *                               due to shutdown signals.
-	 */
-	Set<ComputeRegion> getRegions(boolean canCreateDroplets) throws IOException, InterruptedException;
-
-	/**
-	 * Returns the first region that matches a predicate.
+	 * Returns the regions that match a predicate.
 	 *
 	 * @param predicate the predicate
-	 * @return null if no match is found
+	 * @return an empty list if no match is found
 	 * @throws NullPointerException  if {@code predicate} is null
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
@@ -58,7 +49,20 @@ public interface ComputeClient extends DigitalOceanClient
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	ComputeRegion getRegion(Predicate<ComputeRegion> predicate) throws IOException, InterruptedException;
+	List<ComputeRegion> getRegions(Predicate<ComputeRegion> predicate) throws IOException, InterruptedException;
+
+	/**
+	 * Returns the available regions.
+	 *
+	 * @param canCreateDroplets {@code true} if the returned types must be able to create droplets
+	 * @return an empty list if no match is found
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	List<ComputeRegion> getRegions(boolean canCreateDroplets) throws IOException, InterruptedException;
 
 	/**
 	 * Looks up a region by its ID.
@@ -75,6 +79,20 @@ public interface ComputeClient extends DigitalOceanClient
 	ComputeRegion getRegion(Region.Id id) throws IOException, InterruptedException;
 
 	/**
+	 * Returns the first region that matches a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return null if no match is found
+	 * @throws NullPointerException  if {@code predicate} is null
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	ComputeRegion getRegion(Predicate<ComputeRegion> predicate) throws IOException, InterruptedException;
+
+	/**
 	 * Looks up the default VPC of a region.
 	 *
 	 * @param region the region
@@ -89,32 +107,32 @@ public interface ComputeClient extends DigitalOceanClient
 	Vpc getDefaultVpc(Region.Id region) throws IOException, InterruptedException;
 
 	/**
-	 * Returns all the Droplet types that are available for creating Droplets.
+	 * Returns all the droplet types that are available for creating droplets.
 	 *
-	 * @return an empty set if no match is found
+	 * @return an empty list if no match is found
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
 	 *                               the request may resolve the issue.
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Set<DropletType> getDropletTypes() throws IOException, InterruptedException;
+	List<DropletType> getDropletTypes() throws IOException, InterruptedException;
 
 	/**
-	 * Returns all the Droplet types.
+	 * Returns all the droplet types.
 	 *
-	 * @param canCreateDroplets {@code true} if the returned types must be able to create Droplets
-	 * @return an empty set if no match is found
+	 * @param canCreateDroplets {@code true} if the returned types must be able to create droplets
+	 * @return an empty list if no match is found
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
 	 *                               the request may resolve the issue.
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Set<DropletType> getDropletTypes(boolean canCreateDroplets) throws IOException, InterruptedException;
+	List<DropletType> getDropletTypes(boolean canCreateDroplets) throws IOException, InterruptedException;
 
 	/**
-	 * Returns the first Droplet type that matches a predicate.
+	 * Returns the first droplet type that matches a predicate.
 	 *
 	 * @param predicate the predicate
 	 * @return null if no match is found
@@ -126,6 +144,42 @@ public interface ComputeClient extends DigitalOceanClient
 	 *                               due to shutdown signals.
 	 */
 	DropletType getDropletType(Predicate<DropletType> predicate)
+		throws IOException, InterruptedException;
+
+	/**
+	 * Returns the first droplet image that matches a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return null if no match is found
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted while waiting for a response. This can happen
+	 *                              due to shutdown signals.
+	 */
+	DropletImage getDropletImage(Predicate<DropletImage> predicate) throws IOException, InterruptedException;
+
+	/**
+	 * Returns all the droplet images.
+	 *
+	 * @return null if no match is found
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted while waiting for a response. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<DropletImage> getDropletImages() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the droplet images that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted while waiting for a response. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<DropletImage> getDropletImages(Predicate<DropletImage> predicate)
 		throws IOException, InterruptedException;
 
 	/**
@@ -143,19 +197,7 @@ public interface ComputeClient extends DigitalOceanClient
 	Droplet getDroplet(Droplet.Id id) throws IOException, InterruptedException;
 
 	/**
-	 * Returns the all the Droplets.
-	 *
-	 * @return an empty set if no match is found
-	 * @throws IllegalStateException if the client is closed
-	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
-	 *                               the request may resolve the issue.
-	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
-	 *                               due to shutdown signals.
-	 */
-	Set<Droplet> getDroplets() throws IOException, InterruptedException;
-
-	/**
-	 * Returns the first Droplet that matches a predicate.
+	 * Returns the first droplet that matches a predicate.
 	 *
 	 * @param predicate the predicate
 	 * @return null if no match was found
@@ -170,16 +212,46 @@ public interface ComputeClient extends DigitalOceanClient
 	Droplet getDroplet(Predicate<Droplet> predicate) throws IOException, InterruptedException;
 
 	/**
+	 * Returns the all the droplets.
+	 *
+	 * @return an empty list if no match is found
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	List<Droplet> getDroplets() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the droplets that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException     if {@code predicate} is null
+	 * @throws IllegalArgumentException if any of the tags contain leading or trailing whitespace or are empty
+	 * @throws IllegalStateException    if the client is closed
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted while waiting for a response. This can
+	 *                                  happen due to shutdown signals.
+	 */
+	List<Droplet> getDroplets(Predicate<Droplet> predicate) throws IOException, InterruptedException;
+
+	/**
 	 * Creates a droplet.
 	 *
 	 * @param name  the name of the droplet
 	 * @param type  the machine type of the droplet
 	 * @param image the image ID of a public or private image or the slug identifier for a public image that
 	 *              will be used to boot this droplet
-	 * @return a new Droplet creator
+	 * @return a new droplet creator
 	 * @throws NullPointerException     if any of the arguments are null
 	 * @throws IllegalArgumentException if:
 	 *                                  <ul>
+	 *                                    <li>{@code anchorId} contains any characters other than letters,
+	 *                                    numbers, colons, dashes and underscores.</li>
+	 *                                    <li>is longer than 255 characters.</li>
 	 *                                    <li>the {@code name} contains any characters other than {@code A-Z},
 	 *                                    {@code a-z}, {@code 0-9} and a hyphen.</li>
 	 *                                    <li>the {@code name} does not start or end with an alphanumeric
@@ -190,19 +262,35 @@ public interface ComputeClient extends DigitalOceanClient
 	 * @throws IllegalStateException    if the client is closed
 	 * @see ComputeClient#getDefaultVpc(Region.Id)
 	 */
-	DropletCreator createDroplet(String name, DropletType.Id type, DropletImage image);
+	@CheckReturnValue
+	DropletCreator createDroplet(String name, DropletType.Id type, DropletImage.Id image);
 
 	/**
 	 * Returns all the SSH keys.
 	 *
-	 * @return an empty set if no match is found
+	 * @return an empty list if no match is found
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
 	 *                               the request may resolve the issue.
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Set<SshPublicKey> getSshPublicKeys() throws IOException, InterruptedException;
+	List<SshPublicKey> getSshPublicKeys() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the SSH keys that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException  if {@code predicate} null
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	List<SshPublicKey> getSshPublicKeys(Predicate<SshPublicKey> predicate)
+		throws IOException, InterruptedException;
 
 	/**
 	 * Returns the first SSH key that matches a predicate.
@@ -275,6 +363,7 @@ public interface ComputeClient extends DigitalOceanClient
 	 * @throws InterruptedException     if the thread is interrupted while waiting for a response. This can
 	 *                                  happen due to shutdown signals.
 	 */
+	@CheckReturnValue
 	SshPublicKey createSshPublicKey(String name, PublicKey value)
 		throws GeneralSecurityException, IOException, InterruptedException;
 

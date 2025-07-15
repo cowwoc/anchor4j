@@ -25,18 +25,20 @@ import io.github.cowwoc.anchor4j.docker.resource.ContextEndpoint;
 import io.github.cowwoc.anchor4j.docker.resource.ContextRemover;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImage;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImageBuilder;
-import io.github.cowwoc.anchor4j.docker.resource.ImageElement;
+import io.github.cowwoc.anchor4j.docker.resource.DockerImageElement;
 import io.github.cowwoc.anchor4j.docker.resource.ImagePuller;
 import io.github.cowwoc.anchor4j.docker.resource.ImagePusher;
 import io.github.cowwoc.anchor4j.docker.resource.ImageRemover;
 import io.github.cowwoc.anchor4j.docker.resource.JoinToken;
 import io.github.cowwoc.anchor4j.docker.resource.Network;
+import io.github.cowwoc.anchor4j.docker.resource.NetworkElement;
 import io.github.cowwoc.anchor4j.docker.resource.Node;
 import io.github.cowwoc.anchor4j.docker.resource.Node.Role;
 import io.github.cowwoc.anchor4j.docker.resource.NodeElement;
 import io.github.cowwoc.anchor4j.docker.resource.NodeRemover;
 import io.github.cowwoc.anchor4j.docker.resource.Service;
 import io.github.cowwoc.anchor4j.docker.resource.ServiceCreator;
+import io.github.cowwoc.anchor4j.docker.resource.ServiceElement;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmCreator;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmJoiner;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmLeaver;
@@ -51,6 +53,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 
 /**
  * A Docker client.
@@ -128,7 +131,7 @@ public interface DockerClient extends ContainerClient
 		throws IOException, InterruptedException;
 
 	/**
-	 * Lists all the configs.
+	 * Returns all the configs.
 	 *
 	 * @return an empty list if no match is found
 	 * @throws NotSwarmManagerException if the current node is not a swarm manager
@@ -137,7 +140,21 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<ConfigElement> listConfigs() throws IOException, InterruptedException;
+	List<Config> getConfigs() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the configs that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException     if {@code predicate} is null
+	 * @throws NotSwarmManagerException if the current node is not a swarm manager
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
+	 *                                  happen due to shutdown signals.
+	 */
+	List<Config> getConfigs(Predicate<ConfigElement> predicate) throws IOException, InterruptedException;
 
 	/**
 	 * Returns a config.
@@ -177,7 +194,7 @@ public interface DockerClient extends ContainerClient
 	ConfigCreator createConfig();
 
 	/**
-	 * Lists all the containers.
+	 * Returns all the containers.
 	 *
 	 * @return an empty list if no match is found
 	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
@@ -185,7 +202,21 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
 	 *                              due to shutdown signals.
 	 */
-	List<ContainerElement> listContainers() throws IOException, InterruptedException;
+	List<Container> getContainers() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the containers that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException if {@code predicate} is null
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<Container> getContainers(Predicate<ContainerElement> predicate)
+		throws IOException, InterruptedException;
 
 	/**
 	 * Returns a container.
@@ -434,15 +465,29 @@ public interface DockerClient extends ContainerClient
 	ContainerLogs getContainerLogs(Container.Id id);
 
 	/**
-	 * Lists all the contexts.
+	 * Returns all the contexts.
 	 *
-	 * @return the contexts
+	 * @return an empty list if no match is found
 	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
 	 *                              the request may resolve the issue.
 	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
 	 *                              due to shutdown signals.
 	 */
-	List<ContextElement> listContexts() throws IOException, InterruptedException;
+	List<Context> getContexts() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the contexts that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException if {@code predicate} is null
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<Context> getContexts(Predicate<ContextElement> predicate)
+		throws IOException, InterruptedException;
 
 	/**
 	 * Returns a context.
@@ -584,15 +629,29 @@ public interface DockerClient extends ContainerClient
 	DockerClient setUserContext(Context.Id id) throws IOException, InterruptedException;
 
 	/**
-	 * Lists all the images.
+	 * Returns all the images.
 	 *
-	 * @return the images
+	 * @return an empty list if no match is found
 	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
 	 *                              the request may resolve the issue.
 	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
 	 *                              due to shutdown signals.
 	 */
-	List<ImageElement> listImages() throws IOException, InterruptedException;
+	List<DockerImage> getImages() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the images that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException if {@code predicate} is null
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<DockerImage> getImages(Predicate<DockerImageElement> predicate)
+		throws IOException, InterruptedException;
 
 	/**
 	 * Looks up an image.
@@ -769,6 +828,30 @@ public interface DockerClient extends ContainerClient
 	JoinToken getWorkerJoinToken() throws IOException, InterruptedException;
 
 	/**
+	 * Returns all the networks.
+	 *
+	 * @return an empty list if no match is found
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<Network> getNetworks() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the networks that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException if {@code predicate} is null
+	 * @throws IOException          if an I/O error occurs. These errors are typically transient, and retrying
+	 *                              the request may resolve the issue.
+	 * @throws InterruptedException if the thread is interrupted before the operation completes. This can happen
+	 *                              due to shutdown signals.
+	 */
+	List<Network> getNetworks(Predicate<NetworkElement> predicate) throws IOException, InterruptedException;
+
+	/**
 	 * Looks up a network.
 	 *
 	 * @param id the network's ID
@@ -796,7 +879,7 @@ public interface DockerClient extends ContainerClient
 	Network getNetwork(Network.Id id) throws IOException, InterruptedException;
 
 	/**
-	 * Lists all the nodes.
+	 * Returns all the swarm nodes.
 	 *
 	 * @return the nodes
 	 * @throws NotSwarmManagerException if the current node is not a swarm manager
@@ -805,7 +888,21 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<NodeElement> listNodes() throws IOException, InterruptedException;
+	List<Node> getNodes() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the swarm nodes that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException     if {@code predicate} is null
+	 * @throws NotSwarmManagerException if the current node is not a swarm manager
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
+	 *                                  happen due to shutdown signals.
+	 */
+	List<Node> getNodes(Predicate<NodeElement> predicate) throws IOException, InterruptedException;
 
 	/**
 	 * Lists the manager nodes in the swarm.
@@ -903,7 +1000,7 @@ public interface DockerClient extends ContainerClient
 	 * appear in the results, even if they completed very recently.
 	 * <p>
 	 * Note that Docker prunes old tasks aggressively from this command, so
-	 * {@link #listTasksByService(Service.Id)} will often provide more comprehensive historical data by design.
+	 * {@link #getTasksByService(Service.Id)} will often provide more comprehensive historical data by design.
 	 *
 	 * @return the tasks
 	 * @throws NotSwarmManagerException if the current node is not a swarm manager
@@ -912,13 +1009,13 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<Task> listTasksByNode() throws IOException, InterruptedException;
+	List<Task> getTasksByNode() throws IOException, InterruptedException;
 
 	/**
 	 * Lists the tasks that are assigned to a node.
 	 * <p>
 	 * Note that Docker prunes old tasks aggressively from this command, so
-	 * {@link #listTasksByService(Service.Id)} will often provide more comprehensive historical data by design.
+	 * {@link #getTasksByService(Service.Id)} will often provide more comprehensive historical data by design.
 	 *
 	 * @param id the node's ID or hostname
 	 * @return the tasks
@@ -930,13 +1027,13 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<Task> listTasksByNode(String id) throws IOException, InterruptedException;
+	List<Task> getTasksByNode(String id) throws IOException, InterruptedException;
 
 	/**
 	 * Lists the tasks that are assigned to a node.
 	 * <p>
 	 * Note that Docker prunes old tasks aggressively from this command, so
-	 * {@link #listTasksByService(Service.Id)} will often provide more comprehensive historical data by design.
+	 * {@link #getTasksByService(Service.Id)} will often provide more comprehensive historical data by design.
 	 *
 	 * @param id the node's ID or hostname
 	 * @return the tasks
@@ -947,7 +1044,7 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<Task> listTasksByNode(Node.Id id) throws IOException, InterruptedException;
+	List<Task> getTasksByNode(Node.Id id) throws IOException, InterruptedException;
 
 	/**
 	 * Begins gracefully removing tasks from this node and redistribute them to other active nodes.
@@ -1039,23 +1136,59 @@ public interface DockerClient extends ContainerClient
 	NodeRemover removeNode(Node.Id id);
 
 	/**
-	 * Returns a service.
+	 * Returns all the swarm services.
 	 *
-	 * @param id the ID of the service
-	 * @return the service
-	 * @throws NullPointerException     if {@code id} is null
-	 * @throws IllegalArgumentException if {@code id}'s format is invalid
+	 * @return an empty list if no match is found
+	 * @throws NotSwarmManagerException if the current node is not a swarm manager
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
+	 *                                  happen due to shutdown signals.
 	 */
-	Service getService(String id);
+	List<Service> getServices() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the swarm services that match a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return an empty list if no match is found
+	 * @throws NullPointerException     if {@code predicate} is null
+	 * @throws NotSwarmManagerException if the current node is not a swarm manager
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
+	 *                                  happen due to shutdown signals.
+	 */
+	List<Service> getServices(Predicate<ServiceElement> predicate) throws IOException, InterruptedException;
 
 	/**
 	 * Returns a service.
 	 *
 	 * @param id the ID of the service
 	 * @return the service
-	 * @throws NullPointerException if {@code id} is null
+	 * @throws NullPointerException     if {@code id} is null
+	 * @throws IllegalArgumentException if {@code id}'s format is invalid
+	 * @throws NotSwarmManagerException if the current node is not a swarm manager
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
+	 *                                  happen due to shutdown signals.
 	 */
-	Service getService(Service.Id id);
+	Service getService(String id) throws IOException, InterruptedException;
+
+	/**
+	 * Returns a service.
+	 *
+	 * @param id the ID of the service
+	 * @return the service
+	 * @throws NullPointerException     if {@code id} is null
+	 * @throws NotSwarmManagerException if the current node is not a swarm manager
+	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
+	 *                                  retrying the request may resolve the issue.
+	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
+	 *                                  happen due to shutdown signals.
+	 */
+	Service getService(Service.Id id) throws IOException, InterruptedException;
 
 	/**
 	 * Lists a service's tasks.
@@ -1070,7 +1203,7 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<Task> listTasksByService(String id) throws IOException, InterruptedException;
+	List<Task> getTasksByService(String id) throws IOException, InterruptedException;
 
 	/**
 	 * Lists a service's tasks.
@@ -1084,7 +1217,7 @@ public interface DockerClient extends ContainerClient
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	List<Task> listTasksByService(Service.Id id) throws IOException, InterruptedException;
+	List<Task> getTasksByService(Service.Id id) throws IOException, InterruptedException;
 
 	/**
 	 * Creates a service.

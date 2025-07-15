@@ -3,6 +3,7 @@ package io.github.cowwoc.anchor4j.container.buildx.test.resource;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.github.cowwoc.anchor4j.buildx.client.BuildXClient;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
 import io.github.cowwoc.anchor4j.container.core.resource.BuilderCreator.Driver;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImage;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImageBuilder;
@@ -40,268 +41,296 @@ public final class ImageIT
 	@Test
 	public void build() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildWithCustomDockerfile() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			dockerfile(buildContext.resolve("custom/Dockerfile")).
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				dockerfile(buildContext.resolve("custom/Dockerfile")).
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test(expectedExceptions = FileNotFoundException.class)
 	public void buildWithMissingDockerfile() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		try
-		{
-			client.buildImage().dockerfile(buildContext.resolve("missing/Dockerfile")).apply(buildContext);
-		}
-		catch (FileNotFoundException e)
-		{
-			Files.delete(tempFile);
-			throw e;
+			Path tempFile = Files.createTempFile("", ".tar");
+			try
+			{
+				client.buildImage().dockerfile(buildContext.resolve("missing/Dockerfile")).apply(buildContext);
+			}
+			catch (FileNotFoundException e)
+			{
+				Files.delete(tempFile);
+				throw e;
+			}
 		}
 	}
 
 	@Test
 	public void buildWithSinglePlatform() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			platform("linux/amd64").
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				platform("linux/amd64").
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildWithMultiplePlatform() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			platform("linux/amd64").
-			platform("linux/arm64").
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				platform("linux/amd64").
+				platform("linux/arm64").
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildWithReference() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		String expected = "docker.io/library/integration-test:latest";
-		ContainerImage image = client.buildImage().
-			reference(expected).
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			String expected = "docker.io/library/integration-test:latest";
+			ContainerImage image = client.buildImage().
+				reference(expected).
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		JsonNode indexJson = getIndexJson(client, tempFile.toFile());
-		assert indexJson != null;
-		String actual = indexJson.get("manifests").get(0).get("annotations").get("io.containerd.image.name").
-			asText();
-		requireThat(actual, "actual").withContext(tempFile, "tempFile").
-			isEqualTo(expected, "expected");
-		Files.delete(tempFile);
+			JsonNode indexJson = getIndexJson(client, tempFile.toFile());
+			assert indexJson != null;
+			String actual = indexJson.get("manifests").get(0).get("annotations").get("io.containerd.image.name").
+				asText();
+			requireThat(actual, "actual").withContext(tempFile, "tempFile").
+				isEqualTo(expected, "expected");
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildPassedWithCustomListener() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		TestBuildListener listener = new TestBuildListener();
-		client.buildImage().listener(listener).apply(buildContext);
-		requireThat(listener.buildStarted.get(), "buildStarted").isTrue();
-		requireThat(listener.waitUntilBuildCompletes.get(), "waitUntilBuildCompletes").isTrue();
-		requireThat(listener.buildPassed.get(), "buildSucceeded").isTrue();
-		requireThat(listener.buildFailed.get(), "buildFailed").isFalse();
-		requireThat(listener.buildCompleted.get(), "buildCompleted").isTrue();
+			TestBuildListener listener = new TestBuildListener();
+			client.buildImage().listener(listener).apply(buildContext);
+			requireThat(listener.buildStarted.get(), "buildStarted").isTrue();
+			requireThat(listener.waitUntilBuildCompletes.get(), "waitUntilBuildCompletes").isTrue();
+			requireThat(listener.buildPassed.get(), "buildSucceeded").isTrue();
+			requireThat(listener.buildFailed.get(), "buildFailed").isFalse();
+			requireThat(listener.buildCompleted.get(), "buildCompleted").isTrue();
+		}
 	}
 
 	@Test
 	public void buildFailedWithCustomListener() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		TestBuildListener listener = new TestBuildListener();
-		try
-		{
-			client.buildImage().listener(listener).dockerfile(buildContext.resolve("missing/Dockerfile")).
-				apply(buildContext);
-		}
-		catch (FileNotFoundException _)
-		{
-			requireThat(listener.buildStarted.get(), "buildStarted").isTrue();
-			requireThat(listener.waitUntilBuildCompletes.get(), "waitUntilBuildCompletes").isTrue();
-			requireThat(listener.buildPassed.get(), "buildSucceeded").isFalse();
-			requireThat(listener.buildFailed.get(), "buildFailed").isTrue();
-			requireThat(listener.buildCompleted.get(), "buildCompleted").isTrue();
+			TestBuildListener listener = new TestBuildListener();
+			try
+			{
+				client.buildImage().listener(listener).dockerfile(buildContext.resolve("missing/Dockerfile")).
+					apply(buildContext);
+			}
+			catch (FileNotFoundException _)
+			{
+				requireThat(listener.buildStarted.get(), "buildStarted").isTrue();
+				requireThat(listener.waitUntilBuildCompletes.get(), "waitUntilBuildCompletes").isTrue();
+				requireThat(listener.buildPassed.get(), "buildSucceeded").isFalse();
+				requireThat(listener.buildFailed.get(), "buildFailed").isTrue();
+				requireThat(listener.buildCompleted.get(), "buildCompleted").isTrue();
+			}
 		}
 	}
 
 	@Test
 	public void buildWithCacheFrom() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		ContainerImage image = client.buildImage().
-			export(Exporter.dockerImage().build()).
-			apply(buildContext);
-		requireThat(image, "image").isNotNull();
+			ContainerImage image = client.buildImage().
+				export(Exporter.dockerImage().build()).
+				apply(buildContext);
+			requireThat(image, "image").isNotNull();
 
-		AtomicBoolean cacheWasUsed = new AtomicBoolean(false);
-		client.buildImage().cacheFrom("type=local,src=" + image.getId().getValue()).
-			listener(new DefaultBuildListener()
-			{
-				@Override
-				public void buildStarted(BufferedReader stdoutReader, BufferedReader stderrReader, WaitFor waitFor)
+			AtomicBoolean cacheWasUsed = new AtomicBoolean(false);
+			client.buildImage().cacheFrom("type=local,src=" + image.getId().getValue()).
+				listener(new DefaultBuildListener()
 				{
-					cacheWasUsed.set(false);
-					super.buildStarted(stdoutReader, stderrReader, waitFor);
-				}
+					@Override
+					public void buildStarted(BufferedReader stdoutReader, BufferedReader stderrReader, WaitFor waitFor)
+					{
+						cacheWasUsed.set(false);
+						super.buildStarted(stdoutReader, stderrReader, waitFor);
+					}
 
-				@Override
-				public void onStderrLine(String line)
-				{
-					super.onStderrLine(line);
-					if (line.endsWith("CACHED"))
-						cacheWasUsed.set(true);
-				}
-			}).apply(buildContext);
-		requireThat(cacheWasUsed.get(), "cacheWasUsed").isTrue();
+					@Override
+					public void onStderrLine(String line)
+					{
+						super.onStderrLine(line);
+						if (line.endsWith("CACHED"))
+							cacheWasUsed.set(true);
+					}
+				}).apply(buildContext);
+			requireThat(cacheWasUsed.get(), "cacheWasUsed").isTrue();
+		}
 	}
 
 	@Test(expectedExceptions = FileNotFoundException.class)
 	public void buildWithDockerfileOutsideOfContextPath() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
-		client.buildImage().dockerfile(buildContext.resolve("../custom/Dockerfile")).apply(buildContext);
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
+			client.buildImage().dockerfile(buildContext.resolve("../custom/Dockerfile")).apply(buildContext);
+		}
 	}
 
 	@Test
 	public void buildAndOutputContentsToDirectory() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempDirectory = Files.createTempDirectory("");
-		ContainerImage image = client.buildImage().
-			export(Exporter.contents(tempDirectory.toString()).directory().build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempDirectory = Files.createTempDirectory("");
+			ContainerImage image = client.buildImage().
+				export(Exporter.contents(tempDirectory.toString()).directory().build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		requireThat(tempDirectory, "tempDirectory").contains(tempDirectory.resolve(FILE_IN_CONTAINER));
-		Paths.deleteRecursively(tempDirectory);
+			requireThat(tempDirectory, "tempDirectory").contains(tempDirectory.resolve(FILE_IN_CONTAINER));
+			Paths.deleteRecursively(tempDirectory);
+		}
 	}
 
 	@Test
 	public void buildAndOutputContentsToDirectoryMultiplePlatforms() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempDirectory = Files.createTempDirectory("");
-		List<String> platforms = List.of("linux/amd64", "linux/arm64");
-		ContainerImageBuilder imageBuilder = client.buildImage().
-			export(Exporter.contents(tempDirectory.toString()).directory().build());
-		for (String platform : platforms)
-			imageBuilder.platform(platform);
-		ContainerImage id = imageBuilder.apply(buildContext);
-		requireThat(id, "id").isNull();
+			Path tempDirectory = Files.createTempDirectory("");
+			List<String> platforms = List.of("linux/amd64", "linux/arm64");
+			ContainerImageBuilder imageBuilder = client.buildImage().
+				export(Exporter.contents(tempDirectory.toString()).directory().build());
+			for (String platform : platforms)
+				imageBuilder.platform(platform);
+			ContainerImage id = imageBuilder.apply(buildContext);
+			requireThat(id, "id").isNull();
 
-		List<Path> platformDirectories = new ArrayList<>(platforms.size());
-		for (String platform : platforms)
-			platformDirectories.add(tempDirectory.resolve(platform.replace('/', '_')));
-		requireThat(tempDirectory, "tempDirectory").containsAll(platformDirectories);
-		Paths.deleteRecursively(tempDirectory);
+			List<Path> platformDirectories = new ArrayList<>(platforms.size());
+			for (String platform : platforms)
+				platformDirectories.add(tempDirectory.resolve(platform.replace('/', '_')));
+			requireThat(tempDirectory, "tempDirectory").containsAll(platformDirectories);
+			Paths.deleteRecursively(tempDirectory);
+		}
 	}
 
 	@Test
 	public void buildAndOutputContentsToTarFile() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			export(Exporter.contents(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				export(Exporter.contents(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").containsExactly(Set.of(FILE_IN_CONTAINER));
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").containsExactly(Set.of(FILE_IN_CONTAINER));
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildAndOutputContentsToTarFileMultiplePlatforms() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		List<String> platforms = List.of("linux/amd64", "linux/arm64");
-		ContainerImageBuilder imageBuilder = client.buildImage().
-			export(Exporter.contents(tempFile.toString()).build());
-		for (String platform : platforms)
-			imageBuilder.platform(platform);
-		ContainerImage image = imageBuilder.apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			List<String> platforms = List.of("linux/amd64", "linux/arm64");
+			ContainerImageBuilder imageBuilder = client.buildImage().
+				export(Exporter.contents(tempFile.toString()).build());
+			for (String platform : platforms)
+				imageBuilder.platform(platform);
+			ContainerImage image = imageBuilder.apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").containsExactly(getExpectedTarEntries(List.of(FILE_IN_CONTAINER),
-			platforms));
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").containsExactly(getExpectedTarEntries(List.of(FILE_IN_CONTAINER),
+				platforms));
+			Files.delete(tempFile);
+		}
 	}
 
 	/**
@@ -328,56 +357,61 @@ public final class ImageIT
 	@Test
 	public void buildAndOutputOciImageToDirectory() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempDirectory = Files.createTempDirectory("");
-		ContainerImage image = client.buildImage().
-			export(Exporter.ociImage(tempDirectory.toString()).directory().build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempDirectory = Files.createTempDirectory("");
+			ContainerImage image = client.buildImage().
+				export(Exporter.ociImage(tempDirectory.toString()).directory().build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		requireThat(tempDirectory, "tempDirectory").isNotEmpty();
-		Paths.deleteRecursively(tempDirectory);
+			requireThat(tempDirectory, "tempDirectory").isNotEmpty();
+			Paths.deleteRecursively(tempDirectory);
+		}
 	}
 
 	@Test
 	public void buildAndOutputOciImageToDirectoryUsingDockerContainerDriver() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		String builder = client.createBuilder().driver(Driver.dockerContainer().build()).
-			apply();
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Builder.Id builder = client.createBuilder().driver(Driver.dockerContainer().build()).apply();
 
-		Path buildContext = Path.of("src/test/resources");
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempDirectory = Files.createTempDirectory("");
-		ContainerImage image = client.buildImage().
-			export(Exporter.ociImage(tempDirectory.toString()).directory().build()).
-			builder(builder).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempDirectory = Files.createTempDirectory("");
+			ContainerImage image = client.buildImage().
+				export(Exporter.ociImage(tempDirectory.toString()).directory().build()).
+				builder(builder).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		requireThat(tempDirectory, "tempDirectory").isNotEmpty();
-		Paths.deleteRecursively(tempDirectory);
+			requireThat(tempDirectory, "tempDirectory").isNotEmpty();
+			Paths.deleteRecursively(tempDirectory);
+		}
 	}
 
 	@Test
 	public void buildAndOutputOciImageToDirectoryMultiplePlatforms() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempDirectory = Files.createTempDirectory("");
-		List<String> platforms = List.of("linux/amd64", "linux/arm64");
-		ContainerImageBuilder imageBuilder = client.buildImage().
-			export(Exporter.ociImage(tempDirectory.toString()).directory().build());
-		for (String platform : platforms)
-			imageBuilder.platform(platform);
-		ContainerImage image = imageBuilder.apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempDirectory = Files.createTempDirectory("");
+			List<String> platforms = List.of("linux/amd64", "linux/arm64");
+			ContainerImageBuilder imageBuilder = client.buildImage().
+				export(Exporter.ociImage(tempDirectory.toString()).directory().build());
+			for (String platform : platforms)
+				imageBuilder.platform(platform);
+			ContainerImage image = imageBuilder.apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		requireThat(tempDirectory, "tempDirectory").isNotEmpty();
-		Paths.deleteRecursively(tempDirectory);
+			requireThat(tempDirectory, "tempDirectory").isNotEmpty();
+			Paths.deleteRecursively(tempDirectory);
+		}
 	}
 
 	@Test
@@ -387,77 +421,85 @@ public final class ImageIT
 		//
 		// It outputs: "ERROR: docker exporter does not support exporting manifest lists, use the oci exporter
 		// instead"
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			export(Exporter.dockerImage().path(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				export(Exporter.dockerImage().path(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Paths.deleteRecursively(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Paths.deleteRecursively(tempFile);
+		}
 	}
 
 	@Test
 	public void buildAndOutputOciImageToTarFile() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildAndOutputOciImageToTarFileMultiplePlatforms() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			export(Exporter.ociImage(tempFile.toString()).build()).
-			platform("linux/amd64").
-			platform("linux/arm64").
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				export(Exporter.ociImage(tempFile.toString()).build()).
+				platform("linux/amd64").
+				platform("linux/arm64").
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries = getTarEntries(tempFile.toFile());
-		requireThat(entries, "entries").isNotEmpty();
-		Files.delete(tempFile);
+			Set<String> entries = getTarEntries(tempFile.toFile());
+			requireThat(entries, "entries").isNotEmpty();
+			Files.delete(tempFile);
+		}
 	}
 
 	@Test
 	public void buildWithMultipleOutputs() throws IOException, InterruptedException
 	{
-		BuildXClient client = BuildXClient.build();
-		Path buildContext = Path.of("src/test/resources");
+		try (BuildXClient client = BuildXClient.build())
+		{
+			Path buildContext = Path.of("src/test/resources");
 
-		Path tempFile1 = Files.createTempFile("", ".tar");
-		Path tempFile2 = Files.createTempFile("", ".tar");
-		ContainerImage image = client.buildImage().
-			export(Exporter.dockerImage().path(tempFile1.toString()).build()).
-			export(Exporter.ociImage(tempFile2.toString()).build()).
-			apply(buildContext);
-		requireThat(image, "image").isNull();
+			Path tempFile1 = Files.createTempFile("", ".tar");
+			Path tempFile2 = Files.createTempFile("", ".tar");
+			ContainerImage image = client.buildImage().
+				export(Exporter.dockerImage().path(tempFile1.toString()).build()).
+				export(Exporter.ociImage(tempFile2.toString()).build()).
+				apply(buildContext);
+			requireThat(image, "image").isNull();
 
-		Set<String> entries1 = getTarEntries(tempFile1.toFile());
-		requireThat(entries1, "entries1").isNotEmpty();
+			Set<String> entries1 = getTarEntries(tempFile1.toFile());
+			requireThat(entries1, "entries1").isNotEmpty();
 
-		Set<String> entries2 = getTarEntries(tempFile2.toFile());
-		requireThat(entries2, "entries2").isNotEmpty();
-		Files.delete(tempFile1);
-		Files.delete(tempFile2);
+			Set<String> entries2 = getTarEntries(tempFile2.toFile());
+			requireThat(entries2, "entries2").isNotEmpty();
+			Files.delete(tempFile1);
+			Files.delete(tempFile2);
+		}
 	}
 
 	/**

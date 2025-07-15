@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.github.cowwoc.anchor4j.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
-import io.github.cowwoc.anchor4j.digitalocean.compute.internal.resource.ComputeParser;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType;
-import io.github.cowwoc.anchor4j.digitalocean.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.digitalocean.core.util.CreateResult;
 import io.github.cowwoc.anchor4j.digitalocean.database.client.DatabaseClient;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.Database;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.DatabaseCreator;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.DatabaseType;
+import io.github.cowwoc.anchor4j.digitalocean.network.internal.resource.NetworkParser;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
 import org.eclipse.jetty.client.ContentResponse;
@@ -179,13 +179,13 @@ public final class DefaultDatabaseCreator implements DatabaseCreator
 		// https://docs.digitalocean.com/reference/api/digitalocean/#tag/Databases/operation/databases_create_cluster
 		JsonMapper jm = client.getJsonMapper();
 		DatabaseParser parser = client.getDatabaseParser();
-		ComputeParser computeParser = client.getComputeParser();
+		NetworkParser networkParser = client.getNetworkParser();
 		ObjectNode requestBody = jm.createObjectNode().
 			put("name", name).
 			put("engine", parser.databaseTypeIdToServer(databaseType.id())).
 			put("num_nodes", numberOfStandbyNodes + 1).
 			put("size", dropletType.toString()).
-			put("region", computeParser.regionIdToServer(region));
+			put("region", networkParser.regionIdToServer(region));
 		if (!version.isEmpty())
 			requestBody.put("version", version);
 		if (vpc != null)
@@ -202,12 +202,12 @@ public final class DefaultDatabaseCreator implements DatabaseCreator
 		{
 			ArrayNode firewallRulesNode = requestBody.putArray("rules");
 			for (FirewallRuleBuilder firewallRuleBuilder : firewallRules)
-				firewallRulesNode.add(parser.firewallRuleToServer(client, firewallRuleBuilder));
+				firewallRulesNode.add(parser.firewallRuleToServer(firewallRuleBuilder));
 		}
 		if (additionalStorageInMiB > 0)
 			requestBody.put("storage_size_mib", additionalStorageInMiB);
 		if (restoreFrom != null)
-			requestBody.set("backup_restore", parser.restoreFromToServer(client, restoreFrom));
+			requestBody.set("backup_restore", parser.restoreFromToServer(restoreFrom));
 
 		Request request = client.createRequest(REST_SERVER.resolve("v2/databases"), requestBody).
 			method(POST);
@@ -218,7 +218,7 @@ public final class DefaultDatabaseCreator implements DatabaseCreator
 			{
 				ContentResponse contentResponse = (ContentResponse) serverResponse;
 				JsonNode body = client.getResponseBody(contentResponse);
-				yield CreateResult.created(parser.databaseFromServer(client, body.get("database")));
+				yield CreateResult.created(parser.databaseFromServer(body.get("database")));
 			}
 			case UNAUTHORIZED_401 ->
 			{
@@ -237,7 +237,7 @@ public final class DefaultDatabaseCreator implements DatabaseCreator
 					case "invalid size" -> throw new IllegalArgumentException("dropletType may not be " + dropletType);
 					case "cluster name is not available" ->
 					{
-						Database conflict = client.getDatabase(cluster -> cluster.getName().equals(name));
+						Database conflict = client.getDatabaseCluster(cluster -> cluster.getName().equals(name));
 						if (conflict != null)
 							yield CreateResult.conflictedWith(conflict);
 						throw new AssertionError("Unexpected response: " + client.toString(serverResponse) + "\n" +

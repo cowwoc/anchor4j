@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
+import io.github.cowwoc.anchor4j.core.migration.ResourceId;
 import io.github.cowwoc.anchor4j.digitalocean.compute.client.ComputeClient;
 import io.github.cowwoc.anchor4j.digitalocean.compute.internal.client.DefaultComputeClient;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.Droplet;
@@ -190,7 +191,12 @@ public final class DefaultDroplet implements Droplet
 		}
 		return switch (status)
 		{
-			case "completed" -> reload();
+			case "completed" ->
+			{
+				Droplet reload = reload();
+				client.setTargetState(new ResourceId(Droplet.class, name), reload);
+				yield reload;
+			}
 			case "errored" -> throw new IOException("Failed to rename droplet " + id + " to " + newName);
 			default -> throw new AssertionError("Unexpected response: " + client.toString(serverResponse) + "\n" +
 				"Request: " + client.toString(request));

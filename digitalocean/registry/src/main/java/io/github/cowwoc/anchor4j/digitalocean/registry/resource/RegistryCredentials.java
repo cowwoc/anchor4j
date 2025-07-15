@@ -1,12 +1,6 @@
 package io.github.cowwoc.anchor4j.digitalocean.registry.resource;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.Base64;
-
 import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Credentials for a container registry.
@@ -29,19 +23,5 @@ public record RegistryCredentials(String username, String password)
 	{
 		requireThat(username, "username").isStripped().isNotEmpty();
 		requireThat(password, "password").isStripped().isNotEmpty();
-	}
-
-	/**
-	 * Returns the base64 encoded representation of the credentials.
-	 *
-	 * @param jsonMapper a {@code JsonMapper}
-	 * @return the base64 encoded representation
-	 */
-	public String asBase64Encoded(JsonMapper jsonMapper)
-	{
-		ObjectNode auth = jsonMapper.createObjectNode();
-		auth.put("username", username);
-		auth.put("password", password);
-		return Base64.getEncoder().encodeToString(auth.toString().getBytes(UTF_8));
 	}
 }

@@ -2,7 +2,7 @@ package io.github.cowwoc.anchor4j.digitalocean.compute.resource;
 
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
 import io.github.cowwoc.anchor4j.digitalocean.compute.client.ComputeClient;
-import io.github.cowwoc.anchor4j.digitalocean.core.exception.AccessDeniedException;
+import io.github.cowwoc.anchor4j.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region.Id;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;

@@ -60,4 +60,9 @@ public abstract class AbstractInternalCommandLineClient extends AbstractInternal
 			failureHandler(this::commandFailed).
 			apply();
 	}
+
+	@Override
+	public void close()
+	{
+	}
 }

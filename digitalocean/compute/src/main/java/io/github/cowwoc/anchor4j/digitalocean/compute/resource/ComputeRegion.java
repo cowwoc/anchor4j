@@ -24,11 +24,18 @@ public interface ComputeRegion extends Region
 	Set<Feature> getFeatures();
 
 	/**
-	 * Determines if new Droplets can be created in this region.
+	 * Determines if new droplets can be created in this region.
 	 *
-	 * @return {@code true} if new Droplets can be created
+	 * @return {@code true} if new droplets can be created
 	 */
 	boolean canCreateDroplets();
+
+	/**
+	 * Returns the droplet types that can be created in this region.
+	 *
+	 * @return the droplet types
+	 */
+	Set<DropletType.Id> getDropletTypes();
 
 	/**
 	 * Region features.
@@ -48,7 +55,7 @@ public interface ComputeRegion extends Region
 		 */
 		METADATA,
 		/**
-		 * Ability to install a metrics agent on Droplets.
+		 * Ability to install a metrics agent on droplets.
 		 */
 		INSTALL_AGENT,
 		/**
@@ -56,7 +63,7 @@ public interface ComputeRegion extends Region
 		 */
 		STORAGE,
 		/**
-		 * Ability to use custom Droplet images within this region.
+		 * Ability to use custom droplet images within this region.
 		 */
 		IMAGE_TRANSFER
 	}

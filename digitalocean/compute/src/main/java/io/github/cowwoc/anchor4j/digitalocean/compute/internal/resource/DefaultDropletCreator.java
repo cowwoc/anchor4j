@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.github.cowwoc.anchor4j.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.core.internal.util.Strings;
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
+import io.github.cowwoc.anchor4j.core.migration.ResourceId;
 import io.github.cowwoc.anchor4j.digitalocean.compute.internal.client.DefaultComputeClient;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.Droplet;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletCreator;
@@ -13,7 +15,6 @@ import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletFeature;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletImage;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.SshPublicKey;
-import io.github.cowwoc.anchor4j.digitalocean.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
 import org.eclipse.jetty.client.ContentResponse;
@@ -42,7 +43,7 @@ public final class DefaultDropletCreator implements DropletCreator
 	private final DefaultComputeClient client;
 	private final String name;
 	private final DropletType.Id type;
-	private final DropletImage image;
+	private final DropletImage.Id image;
 	private Region.Id region;
 	private final Set<SshPublicKey> sshKeys = new LinkedHashSet<>();
 	private final Set<DropletFeature> features = EnumSet.of(MONITORING, PRIVATE_NETWORKING);
@@ -73,7 +74,7 @@ public final class DefaultDropletCreator implements DropletCreator
 	 *                                  </ul>
 	 */
 	public DefaultDropletCreator(DefaultComputeClient client, String name, DropletType.Id type,
-		DropletImage image)
+		DropletImage.Id image)
 	{
 		requireThat(client, "client").isNotNull();
 		// Taken from https://docs.digitalocean.com/reference/api/digitalocean/#tag/Droplets/operation/droplets_create
@@ -179,7 +180,7 @@ public final class DefaultDropletCreator implements DropletCreator
 		ObjectNode requestBody = jm.createObjectNode().
 			put("name", name).
 			put("size", type.toString()).
-			put("image", image.getId().getValue());
+			put("image", image.getValue());
 		if (region != null)
 			requestBody.put("region", region.toString());
 		if (!sshKeys.isEmpty())
@@ -239,7 +240,9 @@ public final class DefaultDropletCreator implements DropletCreator
 			throw new AssertionError("Unexpected response: " + client.toString(serverResponse) + "\n" +
 				"Request: " + client.toString(request));
 		}
-		return parser.dropletFromServer(client, dropletNode);
+		Droplet droplet = parser.dropletFromServer(dropletNode);
+		client.setTargetState(new ResourceId(Droplet.class, name), droplet);
+		return droplet;
 	}
 
 	/**

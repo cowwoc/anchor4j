@@ -6,14 +6,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
 import io.github.cowwoc.anchor4j.digitalocean.compute.client.ComputeClient;
-import io.github.cowwoc.anchor4j.digitalocean.compute.internal.resource.ComputeParser;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType;
 import io.github.cowwoc.anchor4j.digitalocean.core.util.CreateResult;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.Kubernetes;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.Kubernetes.MaintenanceSchedule;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesCreator;
-import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesParser;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesVersion;
+import io.github.cowwoc.anchor4j.digitalocean.network.internal.resource.NetworkParser;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region.Id;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
@@ -43,7 +42,7 @@ public final class DefaultKubernetesCreator implements KubernetesCreator
 	private final KubernetesVersion version;
 	private final Set<String> tags = new LinkedHashSet<>();
 	private final Set<NodePoolBuilder> nodePools;
-	private final ComputeParser computeParser = new ComputeParser();
+	private final NetworkParser networkParser;
 	private String clusterSubnet = "";
 	private String serviceSubnet = "";
 	private Vpc.Id vpc;
@@ -81,6 +80,7 @@ public final class DefaultKubernetesCreator implements KubernetesCreator
 		this.region = region;
 		this.version = version;
 		this.nodePools = new HashSet<>(nodePools);
+		this.networkParser = new NetworkParser(client);
 	}
 
 	/**
@@ -372,14 +372,14 @@ public final class DefaultKubernetesCreator implements KubernetesCreator
 	{
 		// https://docs.digitalocean.com/reference/api/api-reference/#operation/kubernetes_create_cluster
 		JsonMapper jm = client.getJsonMapper();
+		KubernetesParser k8sParser = client.getParser();
 		ObjectNode requestBody = jm.createObjectNode().
 			put("name", name).
-			put("region", computeParser.regionIdToServer(region)).
-			put("version", version.toJson());
+			put("region", networkParser.regionIdToServer(region)).
+			put("version", k8sParser.kubernetesVersionToServer(version));
 		ArrayNode nodePoolsNode = requestBody.putArray("node_pools");
-		KubernetesParser parser = client.getParser();
 		for (NodePoolBuilder pool : nodePools)
-			nodePoolsNode.add(parser.nodePoolToServer(client, pool));
+			nodePoolsNode.add(k8sParser.nodePoolToServer(pool));
 		if (!clusterSubnet.isEmpty())
 			requestBody.put("clusterSubnet", clusterSubnet);
 		if (!serviceSubnet.isEmpty())
@@ -387,7 +387,8 @@ public final class DefaultKubernetesCreator implements KubernetesCreator
 		if (vpc != null)
 			requestBody.put("vpc_uuid", vpc.getValue());
 		if (maintenanceSchedule != null)
-			requestBody.set("maintenance_policy", parser.maintenanceScheduleToServer(client, maintenanceSchedule));
+			requestBody.set("maintenance_policy",
+				k8sParser.maintenanceScheduleToServer(maintenanceSchedule));
 		if (autoUpgrade)
 			requestBody.put("auto_upgrade", true);
 		if (surgeUpgrade)
@@ -403,7 +404,7 @@ public final class DefaultKubernetesCreator implements KubernetesCreator
 			{
 				ContentResponse contentResponse = (ContentResponse) serverResponse;
 				JsonNode body = client.getResponseBody(contentResponse);
-				yield CreateResult.created(parser.kubernetesToServer(client, body.get("kubernetes_cluster")));
+				yield CreateResult.created(k8sParser.kubernetesFromServer(body.get("kubernetes_cluster")));
 			}
 			case UNPROCESSABLE_ENTITY_422 ->
 			{
@@ -413,7 +414,7 @@ public final class DefaultKubernetesCreator implements KubernetesCreator
 				String message = json.get("message").textValue();
 				if (message.equals("a cluster with this name already exists"))
 				{
-					Kubernetes conflict = client.getKubernetes(cluster -> cluster.getName().equals(name));
+					Kubernetes conflict = client.getKubernetesCluster(cluster -> cluster.getName().equals(name));
 					if (conflict != null)
 						yield CreateResult.conflictedWith(conflict);
 				}

@@ -1,16 +1,19 @@
 package io.github.cowwoc.anchor4j.docker.resource;
 
 import io.github.cowwoc.anchor4j.docker.client.DockerClient;
+import io.github.cowwoc.anchor4j.docker.resource.Config.Id;
+
+import java.util.function.Predicate;
 
 import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.that;
 
 /**
- * An element returned by {@link DockerClient#listConfigs()}.
+ * The properties used by the predicate in {@link DockerClient#getConfigs(Predicate)}.
  *
  * @param id   the config's ID
  * @param name the config's name
  */
-public record ConfigElement(Config.Id id, String name)
+public record ConfigElement(Id id, String name)
 {
 	/**
 	 * Creates an element.

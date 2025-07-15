@@ -5,7 +5,6 @@ import io.github.cowwoc.anchor4j.docker.client.DockerClient;
 import io.github.cowwoc.anchor4j.docker.exception.NotSwarmManagerException;
 import io.github.cowwoc.anchor4j.docker.exception.ResourceInUseException;
 import io.github.cowwoc.anchor4j.docker.resource.Config;
-import io.github.cowwoc.anchor4j.docker.resource.ConfigElement;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmCreator.WelcomePackage;
 import org.testng.annotations.Test;
 
@@ -76,7 +75,7 @@ public final class ConfigIT
 		DockerClient client = it.getClient();
 		client.createSwarm().apply();
 
-		List<ConfigElement> configs = client.listConfigs();
+		List<Config> configs = client.getConfigs();
 		requireThat(configs, "configs").isEmpty();
 		it.onSuccess();
 	}
@@ -89,8 +88,8 @@ public final class ConfigIT
 		client.createSwarm().apply();
 
 		Config config = client.createConfig().apply(it.getName(), "key=value");
-		List<ConfigElement> configs = client.listConfigs();
-		requireThat(configs, "configs").isEqualTo(List.of(new ConfigElement(config.getId(), config.getName())));
+		List<Config> configs = client.getConfigs();
+		requireThat(configs, "configs").isEqualTo(List.of(config));
 		it.onSuccess();
 	}
 
@@ -101,7 +100,7 @@ public final class ConfigIT
 		DockerClient client = it.getClient();
 		try
 		{
-			client.listConfigs();
+			client.getConfigs();
 		}
 		catch (NotSwarmManagerException e)
 		{

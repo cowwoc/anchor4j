@@ -2,18 +2,24 @@ package io.github.cowwoc.anchor4j.docker.internal.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import io.github.cowwoc.anchor4j.container.core.internal.client.AbstractInternalContainer;
+import io.github.cowwoc.anchor4j.container.core.internal.client.AbstractInternalContainerClient;
 import io.github.cowwoc.anchor4j.container.core.internal.client.CommandRunner;
 import io.github.cowwoc.anchor4j.container.core.internal.util.ParameterValidator;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImage;
+import io.github.cowwoc.anchor4j.core.internal.util.Lists;
 import io.github.cowwoc.anchor4j.core.internal.util.Paths;
 import io.github.cowwoc.anchor4j.core.resource.CommandResult;
 import io.github.cowwoc.anchor4j.docker.client.DockerClient;
 import io.github.cowwoc.anchor4j.docker.exception.NotSwarmManagerException;
 import io.github.cowwoc.anchor4j.docker.exception.ResourceNotFoundException;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ConfigParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ContainerParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ContextParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ConfigParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ContainerParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ContextParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ImageParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.NetworkParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.NodeParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ServiceParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.SwarmParser;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultConfigCreator;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultContainerCreator;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultContainerLogs;
@@ -27,16 +33,10 @@ import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultImagePuller;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultImagePusher;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultImageRemover;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultNodeRemover;
-import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultService;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultServiceCreator;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultSwarmCreator;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultSwarmJoiner;
 import io.github.cowwoc.anchor4j.docker.internal.resource.DefaultSwarmLeaver;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ImageParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.NetworkParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.NodeParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ServiceParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.SwarmParser;
 import io.github.cowwoc.anchor4j.docker.resource.Config;
 import io.github.cowwoc.anchor4j.docker.resource.ConfigCreator;
 import io.github.cowwoc.anchor4j.docker.resource.ConfigElement;
@@ -54,12 +54,13 @@ import io.github.cowwoc.anchor4j.docker.resource.ContextEndpoint;
 import io.github.cowwoc.anchor4j.docker.resource.ContextRemover;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImage;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImageBuilder;
-import io.github.cowwoc.anchor4j.docker.resource.ImageElement;
+import io.github.cowwoc.anchor4j.docker.resource.DockerImageElement;
 import io.github.cowwoc.anchor4j.docker.resource.ImagePuller;
 import io.github.cowwoc.anchor4j.docker.resource.ImagePusher;
 import io.github.cowwoc.anchor4j.docker.resource.ImageRemover;
 import io.github.cowwoc.anchor4j.docker.resource.JoinToken;
 import io.github.cowwoc.anchor4j.docker.resource.Network;
+import io.github.cowwoc.anchor4j.docker.resource.NetworkElement;
 import io.github.cowwoc.anchor4j.docker.resource.Node;
 import io.github.cowwoc.anchor4j.docker.resource.Node.Id;
 import io.github.cowwoc.anchor4j.docker.resource.Node.Role;
@@ -67,6 +68,7 @@ import io.github.cowwoc.anchor4j.docker.resource.NodeElement;
 import io.github.cowwoc.anchor4j.docker.resource.NodeRemover;
 import io.github.cowwoc.anchor4j.docker.resource.Service;
 import io.github.cowwoc.anchor4j.docker.resource.ServiceCreator;
+import io.github.cowwoc.anchor4j.docker.resource.ServiceElement;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmCreator;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmJoiner;
 import io.github.cowwoc.anchor4j.docker.resource.SwarmLeaver;
@@ -85,14 +87,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.StructuredTaskScope.ShutdownOnFailure;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @SuppressWarnings("PMD.MoreThanOneLogger")
-public final class DefaultDockerClient extends AbstractInternalContainer
+public final class DefaultDockerClient extends AbstractInternalContainerClient
 	implements InternalDockerClient
 {
 	private static final ConcurrentLazyReference<Path> EXECUTABLE_FROM_PATH = ConcurrentLazyReference.create(
@@ -265,12 +271,21 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<ConfigElement> listConfigs() throws IOException, InterruptedException
+	public List<Config> getConfigs() throws IOException, InterruptedException
+	{
+		return getConfigs(_ -> true);
+	}
+
+	@Override
+	public List<Config> getConfigs(Predicate<ConfigElement> predicate) throws IOException, InterruptedException
 	{
 		// https://docs.docker.com/reference/cli/docker/config/ls/
 		List<String> arguments = List.of("config", "ls", "--format", "json");
 		CommandResult result = retry(_ -> run(arguments));
-		return getConfigParser().list(result);
+		List<Config> configs = new ArrayList<>();
+		for (ConfigElement match : getConfigParser().list(result).stream().filter(predicate).toList())
+			configs.add(getConfig(match.id()));
+		return configs;
 	}
 
 	@Override
@@ -285,7 +300,7 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 		// https://docs.docker.com/reference/cli/docker/config/inspect/
 		List<String> arguments = List.of("config", "inspect", id.getValue());
 		CommandResult result = retry(_ -> run(arguments));
-		return getConfigParser().getState(result);
+		return getConfigParser().configFromServer(result);
 	}
 
 	@Override
@@ -295,12 +310,22 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<ContainerElement> listContainers() throws IOException, InterruptedException
+	public List<Container> getContainers() throws IOException, InterruptedException
+	{
+		return getContainers(_ -> true);
+	}
+
+	@Override
+	public List<Container> getContainers(Predicate<ContainerElement> predicate)
+		throws IOException, InterruptedException
 	{
 		// https://docs.docker.com/reference/cli/docker/container/ls/
 		List<String> arguments = List.of("container", "ls", "--format", "json", "--all", "--no-trunc");
 		CommandResult result = retry(_ -> run(arguments));
-		return getContainerParser().list(result);
+		List<Container> containers = new ArrayList<>();
+		for (ContainerElement match : getContainerParser().list(result).stream().filter(predicate).toList())
+			containers.add(getContainer(match.id()));
+		return containers;
 	}
 
 	@Override
@@ -317,7 +342,7 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 		// https://docs.docker.com/reference/cli/docker/container/inspect/
 		List<String> arguments = List.of("container", "inspect", id.getValue());
 		CommandResult result = retry(_ -> run(arguments));
-		return getContainerParser().getState(result);
+		return getContainerParser().configFromServer(result);
 	}
 
 	@Override
@@ -556,7 +581,14 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<ContextElement> listContexts() throws IOException, InterruptedException
+	public List<Context> getContexts() throws IOException, InterruptedException
+	{
+		return getContexts(_ -> true);
+	}
+
+	@Override
+	public List<Context> getContexts(Predicate<ContextElement> predicate)
+		throws IOException, InterruptedException
 	{
 		// https://docs.docker.com/reference/cli/docker/context/ls/
 		List<String> arguments = List.of("context", "ls", "--format", "json");
@@ -565,7 +597,18 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 			CommandResult result = run(arguments);
 			try
 			{
-				return getContextParser().list(result);
+				List<Context> contexts = new ArrayList<>();
+				for (ContextElement match : getContextParser().list(result).stream().filter(predicate).toList())
+				{
+					Context context = getContext(match.id());
+					if (context == null)
+					{
+						// The context is not fully initialized, skip it.
+						continue;
+					}
+					contexts.add(context);
+				}
+				return contexts;
 			}
 			catch (IllegalArgumentException e)
 			{
@@ -658,12 +701,22 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<ImageElement> listImages() throws IOException, InterruptedException
+	public List<DockerImage> getImages() throws IOException, InterruptedException
+	{
+		return getImages(_ -> true);
+	}
+
+	@Override
+	public List<DockerImage> getImages(Predicate<DockerImageElement> predicate)
+		throws IOException, InterruptedException
 	{
 		// https://docs.docker.com/reference/cli/docker/image/ls/
 		List<String> arguments = List.of("image", "ls", "--format", "json", "--all", "--digests", "--no-trunc");
 		CommandResult result = retry(_ -> run(arguments));
-		return getImageParser().list(result);
+		List<DockerImage> images = new ArrayList<>();
+		for (DockerImageElement match : getImageParser().list(result).stream().filter(predicate).toList())
+			images.add(getImage(match.id()));
+		return images;
 	}
 
 	@Override
@@ -680,7 +733,7 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 		// https://docs.docker.com/reference/cli/docker/image/inspect/
 		List<String> arguments = List.of("image", "inspect", "--format", "json", id.getValue());
 		CommandResult result = retry(_ -> run(arguments));
-		return getImageParser().getState(result);
+		return getImageParser().imageFromServer(result);
 	}
 
 	@Override
@@ -768,6 +821,25 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
+	public List<Network> getNetworks() throws IOException, InterruptedException
+	{
+		return getNetworks(_ -> true);
+	}
+
+	@Override
+	public List<Network> getNetworks(Predicate<NetworkElement> predicate)
+		throws IOException, InterruptedException
+	{
+		// https://docs.docker.com/reference/cli/docker/network/ls/
+		List<String> arguments = List.of("network", "ls", "--format", "json", "--no-trunc");
+		CommandResult result = retry(_ -> run(arguments));
+		List<Network> networks = new ArrayList<>();
+		for (NetworkElement match : getNetworkParser().list(result).stream().filter(predicate).toList())
+			networks.add(getNetwork(match.id()));
+		return networks;
+	}
+
+	@Override
 	public Network getNetwork(String id) throws IOException, InterruptedException
 	{
 		return getNetwork(Network.id(id));
@@ -781,13 +853,22 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 		// https://docs.docker.com/reference/cli/docker/network/inspect/
 		List<String> arguments = List.of("network", "inspect", id.getValue());
 		CommandResult result = retry(_ -> run(arguments));
-		return getNetworkParser().getState(result);
+		return getNetworkParser().networkFromServer(result);
 	}
 
 	@Override
-	public List<NodeElement> listNodes() throws IOException, InterruptedException
+	public List<Node> getNodes() throws IOException, InterruptedException
 	{
-		return listNodes(List.of());
+		return getNodes(_ -> true);
+	}
+
+	@Override
+	public List<Node> getNodes(Predicate<NodeElement> predicate) throws IOException, InterruptedException
+	{
+		List<Node> nodes = new ArrayList<>();
+		for (NodeElement match : getNodes(List.of()).stream().filter(predicate).toList())
+			nodes.add(getNode(match.id()));
+		return nodes;
 	}
 
 	/**
@@ -802,7 +883,7 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	private List<NodeElement> listNodes(List<String> filters) throws IOException, InterruptedException
+	private List<NodeElement> getNodes(List<String> filters) throws IOException, InterruptedException
 	{
 		assert filters != null;
 
@@ -824,13 +905,13 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	@Override
 	public List<NodeElement> listManagerNodes() throws IOException, InterruptedException
 	{
-		return listNodes(List.of("role=manager"));
+		return getNodes(List.of("role=manager"));
 	}
 
 	@Override
 	public List<NodeElement> listWorkerNodes() throws IOException, InterruptedException
 	{
-		return listNodes(List.of("role=worker"));
+		return getNodes(List.of("role=worker"));
 	}
 
 	@Override
@@ -870,7 +951,7 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<Task> listTasksByNode() throws IOException, InterruptedException
+	public List<Task> getTasksByNode() throws IOException, InterruptedException
 	{
 		// https://docs.docker.com/reference/cli/docker/node/ps/
 		List<String> arguments = new ArrayList<>(5);
@@ -884,13 +965,13 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<Task> listTasksByNode(String id) throws IOException, InterruptedException
+	public List<Task> getTasksByNode(String id) throws IOException, InterruptedException
 	{
-		return listTasksByNode(Node.id(id));
+		return getTasksByNode(Node.id(id));
 	}
 
 	@Override
-	public List<Task> listTasksByNode(Node.Id id) throws IOException, InterruptedException
+	public List<Task> getTasksByNode(Node.Id id) throws IOException, InterruptedException
 	{
 		requireThat(id, "id").isNotNull();
 
@@ -977,15 +1058,37 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public Service getService(String id)
+	public List<Service> getServices() throws IOException, InterruptedException
+	{
+		return getServices(_ -> true);
+	}
+
+	@Override
+	public List<Service> getServices(Predicate<ServiceElement> predicate)
+		throws IOException, InterruptedException
+	{
+		// https://docs.docker.com/reference/cli/docker/service/ls/
+		List<String> arguments = List.of("service", "ls", "--format", "json", "--no-trunc");
+		CommandResult result = retry(_ -> run(arguments));
+		List<Service> services = new ArrayList<>();
+		for (ServiceElement match : getServiceParser().listServices(result).stream().filter(predicate).toList())
+			services.add(getService(match.id()));
+		return services;
+	}
+
+	@Override
+	public Service getService(String id) throws IOException, InterruptedException
 	{
 		return getService(Service.id(id));
 	}
 
 	@Override
-	public Service getService(Service.Id id)
+	public Service getService(Service.Id id) throws IOException, InterruptedException
 	{
-		return new DefaultService(this, id);
+		// https://docs.docker.com/reference/cli/docker/service/inspect/
+		List<String> arguments = List.of("service", "inspect", "--format", "json", id.getValue());
+		CommandResult result = retry(_ -> run(arguments));
+		return getServiceParser().getService(result);
 	}
 
 	@Override
@@ -1001,13 +1104,13 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 	}
 
 	@Override
-	public List<Task> listTasksByService(String id) throws IOException, InterruptedException
+	public List<Task> getTasksByService(String id) throws IOException, InterruptedException
 	{
-		return listTasksByService(Service.id(id));
+		return getTasksByService(Service.id(id));
 	}
 
 	@Override
-	public List<Task> listTasksByService(Service.Id id) throws IOException, InterruptedException
+	public List<Task> getTasksByService(Service.Id id) throws IOException, InterruptedException
 	{
 		requireThat(id, "id").isNotNull();
 
@@ -1041,5 +1144,90 @@ public final class DefaultDockerClient extends AbstractInternalContainer
 		arguments.add(id.getValue());
 		CommandResult result = retry(_ -> run(arguments));
 		return getNodeParser().getTaskState(result);
+	}
+
+	@Override
+	public List<Object> getResources(Predicate<? super Class<?>> typeFilter,
+		Predicate<Object> resourceFilter) throws IOException, InterruptedException
+	{
+		Set<Class<?>> types = Set.of(Config.class, Container.class, Context.class, DockerImage.class,
+			Network.class, Node.class, Service.class, Task.class);
+		types = types.stream().filter(typeFilter).collect(Collectors.toSet());
+		if (types.isEmpty())
+			return List.of();
+
+		try (
+			ShutdownOnFailure scope = new ShutdownOnFailure("Docker.DriftDetection",
+				Thread.ofVirtual().name("docker-driftdetection-", 1).factory()))
+		{
+			Supplier<List<Config>> configs;
+			if (types.contains(Config.class))
+				configs = scope.fork(() -> getConfigs(resourceFilter::test));
+			else
+				configs = List::of;
+
+			Supplier<List<Container>> containers;
+			if (types.contains(Container.class))
+				containers = scope.fork(() -> getContainers(resourceFilter::test));
+			else
+				containers = List::of;
+
+			Supplier<List<Context>> contexts;
+			if (types.contains(Context.class))
+				contexts = scope.fork(() -> getContexts(resourceFilter::test));
+			else
+				contexts = List::of;
+
+			Supplier<List<DockerImage>> dockerImages;
+			if (types.contains(DockerImage.class))
+				dockerImages = scope.fork(() -> getImages(resourceFilter::test));
+			else
+				dockerImages = List::of;
+
+			Supplier<List<Network>> networks;
+			if (types.contains(Network.class))
+				networks = scope.fork(() -> getNetworks(resourceFilter::test));
+			else
+				networks = List::of;
+
+			Supplier<List<Node>> nodes;
+			if (types.contains(Node.class))
+				nodes = scope.fork(() -> getNodes(resourceFilter::test));
+			else
+				nodes = List::of;
+
+			Supplier<List<Service>> services;
+			if (types.contains(Service.class))
+				services = scope.fork(() -> getServices(resourceFilter::test));
+			else
+				services = List::of;
+
+			try
+			{
+				scope.join().throwIfFailed();
+			}
+			catch (ExecutionException e)
+			{
+				if (e.getCause() instanceof IOException ioe)
+					throw ioe;
+				throw WrappedCheckedException.wrap(e);
+			}
+
+			List<Service> servicesAsList = services.get();
+			List<Task> tasks = new ArrayList<>();
+			if (types.contains(Task.class))
+			{
+				for (Service service : servicesAsList)
+					tasks.addAll(getTasksByService(service.getId()));
+			}
+
+			return Lists.combine(configs.get(), containers.get(), contexts.get(), dockerImages.get(), nodes.get(),
+				servicesAsList, tasks);
+		}
+	}
+
+	@Override
+	public void close()
+	{
 	}
 }

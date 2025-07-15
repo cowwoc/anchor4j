@@ -1,7 +1,7 @@
 package io.github.cowwoc.anchor4j.digitalocean.registry.resource;
 
+import io.github.cowwoc.anchor4j.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.core.id.StringId;
-import io.github.cowwoc.anchor4j.digitalocean.core.exception.AccessDeniedException;
 import io.github.cowwoc.anchor4j.digitalocean.core.exception.TooManyRequestsException;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public interface ContainerImage
 	 *
 	 * @return the repository
 	 */
-	ContainerRepository getRepository();
+	Repository getRepository();
 
 	/**
 	 * Returns the image's ID. An ID uniquely identifies the image within a repository.

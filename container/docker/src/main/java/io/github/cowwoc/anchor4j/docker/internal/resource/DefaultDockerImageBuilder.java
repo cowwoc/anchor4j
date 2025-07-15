@@ -3,6 +3,7 @@ package io.github.cowwoc.anchor4j.docker.internal.resource;
 import io.github.cowwoc.anchor4j.container.core.internal.client.InternalContainerClient;
 import io.github.cowwoc.anchor4j.container.core.internal.resource.DefaultContainerImageBuilder;
 import io.github.cowwoc.anchor4j.container.core.resource.BuildListener;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImage;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImageBuilder;
 
@@ -56,7 +57,7 @@ public final class DefaultDockerImageBuilder extends DefaultContainerImageBuilde
 	}
 
 	@Override
-	public DockerImageBuilder builder(String builder)
+	public DockerImageBuilder builder(Builder.Id builder)
 	{
 		return (DockerImageBuilder) super.builder(builder);
 	}

@@ -1,6 +1,7 @@
 package io.github.cowwoc.anchor4j.docker.resource;
 
 import io.github.cowwoc.anchor4j.container.core.resource.BuildListener;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImageBuilder;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public interface DockerImageBuilder extends ContainerImageBuilder
 	DockerImageBuilder export(Exporter exporter);
 
 	@Override
-	DockerImageBuilder builder(String builder);
+	DockerImageBuilder builder(Builder.Id builder);
 
 	@Override
 	DockerImageBuilder listener(BuildListener listener);

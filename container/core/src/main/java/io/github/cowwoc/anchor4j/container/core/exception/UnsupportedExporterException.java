@@ -5,7 +5,7 @@ import java.io.Serial;
 import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
 
 /**
- * Thrown if the builder driver does not support one of the requested exporters.
+ * Thrown if the build driver does not support one of the requested exporters.
  */
 public class UnsupportedExporterException extends IllegalStateException
 {

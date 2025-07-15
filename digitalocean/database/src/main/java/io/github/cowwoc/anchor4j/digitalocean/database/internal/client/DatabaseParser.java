@@ -2,6 +2,7 @@ package io.github.cowwoc.anchor4j.digitalocean.database.internal.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.github.cowwoc.anchor4j.core.client.Client;
 import io.github.cowwoc.anchor4j.core.internal.resource.AbstractParser;
 import io.github.cowwoc.anchor4j.core.internal.util.Strings;
 import io.github.cowwoc.anchor4j.digitalocean.compute.resource.DropletType;
@@ -28,6 +29,7 @@ import io.github.cowwoc.anchor4j.digitalocean.database.resource.DatabaseCreator.
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.DatabaseType;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.Endpoint;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.ResourceType;
+import io.github.cowwoc.anchor4j.digitalocean.network.internal.resource.NetworkParser;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Vpc;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,25 @@ import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.that;
  */
 public final class DatabaseParser extends AbstractParser
 {
+	private final NetworkParser networkParser;
+
+	/**
+	 * Creates a new DatabaseParser.
+	 *
+	 * @param client the client configuration
+	 */
+	public DatabaseParser(Client client)
+	{
+		super(client);
+		this.networkParser = new NetworkParser(client);
+	}
+
+	@Override
+	protected DefaultDatabaseClient getClient()
+	{
+		return (DefaultDatabaseClient) super.getClient();
+	}
+
 	/**
 	 * Converts DatabaseType.Id from its server representation.
 	 *
@@ -102,17 +123,16 @@ public final class DatabaseParser extends AbstractParser
 	/**
 	 * Converts Database from its server representation.
 	 *
-	 * @param client the client configuration
-	 * @param json   the server representation
+	 * @param json the server representation
 	 * @return the database
-	 * @throws NullPointerException  if any of the arguments are null
+	 * @throws NullPointerException  if {@code json} is null
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
 	 *                               the request may resolve the issue.
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	public Database databaseFromServer(DefaultDatabaseClient client, JsonNode json)
+	public Database databaseFromServer(JsonNode json)
 		throws IOException, InterruptedException
 	{
 		try
@@ -125,7 +145,7 @@ public final class DatabaseParser extends AbstractParser
 			int numberOfNodes = getInt(json, "num_nodes");
 			DropletType.Id dropletType = DropletType.id(json.get("size").textValue());
 
-			Region.Id region = client.getComputeParser().regionIdFromServer(json.get("region"));
+			Region.Id region = networkParser.regionIdFromServer(json.get("region"));
 			Status status = statusFromServer(json.get("status"));
 
 			JsonNode vpcNode = json.get("private_network_uuid");
@@ -165,7 +185,7 @@ public final class DatabaseParser extends AbstractParser
 			Set<Endpoint> metricsEndpoints = getElements(json, "metrics_endpoints", this::endpointFromServer);
 
 			Instant createdAt = Instant.parse(json.get("created_at").textValue());
-			return new DefaultDatabase(client, id, name, databaseTypeId, version, semanticVersion,
+			return new DefaultDatabase(getClient(), id, name, databaseTypeId, version, semanticVersion,
 				numberOfNodes - 1, dropletType, region, status, vpc, tags, databaseNames, openSearchDashboard,
 				publicConnection, privateConnection, standbyPublicConnection, standbyPrivateConnection, users,
 				maintenanceSchedule, projectId, firewallRules, versionEndOfLife, versionEndOfAvailability,
@@ -206,16 +226,15 @@ public final class DatabaseParser extends AbstractParser
 	}
 
 	/**
-	 * Converts FirewallRule from its server representation.
+	 * Converts FirewallRule to its server representation.
 	 *
-	 * @param client the client configuration
-	 * @param value  the FirewallRule
+	 * @param value the FirewallRule
 	 * @return the server representation
-	 * @throws NullPointerException if any of the arguments are null
+	 * @throws NullPointerException if {@code value} is null
 	 */
-	public JsonNode firewallRuleToServer(DefaultDatabaseClient client, FirewallRuleBuilder value)
+	public JsonNode firewallRuleToServer(FirewallRuleBuilder value)
 	{
-		ObjectNode json = client.getJsonMapper().createObjectNode();
+		ObjectNode json = getClient().getJsonMapper().createObjectNode();
 		if (!value.id().isEmpty())
 			json.put("uuid", value.id());
 		json.put("type", value.resourceType().name().toLowerCase(Locale.ROOT));
@@ -556,16 +575,15 @@ public final class DatabaseParser extends AbstractParser
 	}
 
 	/**
-	 * Converts RestoreFrom from its server representation.
+	 * Converts RestoreFrom to its server representation.
 	 *
-	 * @param client the client configuration
-	 * @param value  the FirewallRule
+	 * @param value the FirewallRule
 	 * @return the server representation
-	 * @throws NullPointerException if any of the arguments are null
+	 * @throws NullPointerException if {@code value} is null
 	 */
-	public JsonNode restoreFromToServer(DefaultDatabaseClient client, RestoreFrom value)
+	public JsonNode restoreFromToServer(RestoreFrom value)
 	{
-		ObjectNode json = client.getJsonMapper().createObjectNode();
+		ObjectNode json = getClient().getJsonMapper().createObjectNode();
 		json.put("database_name", value.databaseName());
 		json.put("backup_created_at", value.createdAt().toString());
 		return json;

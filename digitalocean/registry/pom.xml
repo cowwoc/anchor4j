@@ -20,6 +20,10 @@
 			<artifactId>anchor4j-digitalocean-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>anchor4j-container-docker</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-client</artifactId>
 		</dependency>

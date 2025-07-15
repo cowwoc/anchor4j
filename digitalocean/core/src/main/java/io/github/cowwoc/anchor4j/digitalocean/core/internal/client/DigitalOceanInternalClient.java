@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The internals of a {@code DigitalOceanClient}.
@@ -66,8 +66,8 @@ public interface DigitalOceanInternalClient extends DigitalOceanClient, Internal
 	 * @param <T>        the type of elements in the Set
 	 * @param uri        the URI to send a request to
 	 * @param parameters the parameters to add to the request
-	 * @param mapper     a function that transforms the server response into a set of elements
-	 * @return the elements
+	 * @param mapper     a function that transforms the server response into a list of elements
+	 * @return an empty list if no match is found
 	 * @throws NullPointerException  if any of the arguments are null
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
@@ -75,7 +75,7 @@ public interface DigitalOceanInternalClient extends DigitalOceanClient, Internal
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	<T> Set<T> getElements(URI uri, Map<String, Collection<String>> parameters, JsonToObject<Set<T>> mapper)
+	<T> List<T> getElements(URI uri, Map<String, Collection<String>> parameters, JsonToObject<List<T>> mapper)
 		throws IOException, InterruptedException;
 
 	/**

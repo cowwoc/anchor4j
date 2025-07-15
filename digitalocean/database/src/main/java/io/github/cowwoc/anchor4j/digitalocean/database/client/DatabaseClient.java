@@ -8,9 +8,10 @@ import io.github.cowwoc.anchor4j.digitalocean.database.resource.Database.Id;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.DatabaseCreator;
 import io.github.cowwoc.anchor4j.digitalocean.database.resource.DatabaseType;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
+import io.github.cowwoc.requirements12.annotation.CheckReturnValue;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -45,17 +46,17 @@ public interface DatabaseClient extends DigitalOceanClient
 	/**
 	 * Returns the database clusters.
 	 *
-	 * @return an empty set if no match is found
+	 * @return an empty list if no match is found
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
 	 *                               the request may resolve the issue.
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Set<Database> getDatabases() throws IOException, InterruptedException;
+	List<Database> getDatabaseClusters() throws IOException, InterruptedException;
 
 	/**
-	 * Returns the first database that matches a predicate.
+	 * Returns the databases that matches a predicate.
 	 *
 	 * @param predicate the predicate
 	 * @return null if no match is found
@@ -66,7 +67,7 @@ public interface DatabaseClient extends DigitalOceanClient
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Database getDatabase(Predicate<Database> predicate) throws IOException, InterruptedException;
+	List<Database> getDatabaseClusters(Predicate<Database> predicate) throws IOException, InterruptedException;
 
 	/**
 	 * Looks up a database cluster by its ID.
@@ -80,7 +81,21 @@ public interface DatabaseClient extends DigitalOceanClient
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Database getDatabase(Id id) throws IOException, InterruptedException;
+	Database getDatabaseCluster(Id id) throws IOException, InterruptedException;
+
+	/**
+	 * Returns the first database that matches a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return null if no match is found
+	 * @throws NullPointerException  if {@code predicate} is null
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	Database getDatabaseCluster(Predicate<Database> predicate) throws IOException, InterruptedException;
 
 	/**
 	 * Creates a database cluster.
@@ -102,6 +117,7 @@ public interface DatabaseClient extends DigitalOceanClient
 	 *                                  </ul>
 	 * @throws IllegalStateException    if the client is closed
 	 */
-	DatabaseCreator createDatabase(DatabaseClient client, String name, DatabaseType databaseType,
+	@CheckReturnValue
+	DatabaseCreator createDatabaseCluster(DatabaseClient client, String name, DatabaseType databaseType,
 		int numberOfStandbyNodes, DropletType.Id dropletType, Region.Id region);
 }

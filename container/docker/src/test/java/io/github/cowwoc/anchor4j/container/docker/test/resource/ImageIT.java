@@ -1,6 +1,7 @@
 package io.github.cowwoc.anchor4j.container.docker.test.resource;
 
 import io.github.cowwoc.anchor4j.container.core.resource.BuildListener.Output;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
 import io.github.cowwoc.anchor4j.container.core.resource.BuilderCreator.Driver;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImage;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImageBuilder.Exporter;
@@ -13,7 +14,6 @@ import io.github.cowwoc.anchor4j.docker.client.DockerClient;
 import io.github.cowwoc.anchor4j.docker.exception.ResourceNotFoundException;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImage;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImageBuilder;
-import io.github.cowwoc.anchor4j.docker.resource.ImageElement;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.testng.annotations.Test;
@@ -87,7 +87,7 @@ public final class ImageIT
 	{
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
-		List<ImageElement> images = client.listImages();
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").isEmpty();
 		it.onSuccess();
 	}
@@ -97,15 +97,17 @@ public final class ImageIT
 	{
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
-		DockerImage image = client.pullImage(EXISTING_IMAGE).apply();
-		requireThat(image, "image").isNotNull();
+		DockerImage image1 = client.pullImage(EXISTING_IMAGE).apply();
+		requireThat(image1, "image1").isNotNull();
 
-		List<ImageElement> images = client.listImages();
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").size().isEqualTo(1);
-		ImageElement element = images.getFirst();
-		requireThat(element.referenceToTags().keySet(), "element.references()").
+		DockerImage image2 = images.getFirst();
+		requireThat(image1, "image1").isEqualTo(image2, "image2");
+
+		requireThat(image2.referenceToTags().keySet(), "image2.references()").
 			isEqualTo(Set.of(EXISTING_IMAGE));
-		requireThat(element.referenceToTags(), "element.referenceToTags()").
+		requireThat(image2.referenceToTags(), "image2.referenceToTags()").
 			isEqualTo(Map.of(EXISTING_IMAGE, Set.of("latest")));
 		it.onSuccess();
 	}
@@ -117,19 +119,9 @@ public final class ImageIT
 		DockerClient client = it.getClient();
 		DockerImage image = client.pullImage(EXISTING_IMAGE).apply();
 		requireThat(image, "image").isNotNull();
+		image = image.addTag("rocket-ship").reload();
 
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").size().isEqualTo(1);
-		ImageElement element = images.getFirst();
-		requireThat(element.referenceToTags().keySet(), "element.references()").
-			isEqualTo(Set.of(EXISTING_IMAGE));
-
-		image.addTag("rocket-ship");
-
-		images = client.listImages();
-		requireThat(images, "images").size().isEqualTo(1);
-		element = images.getFirst();
-		requireThat(element.referenceToTags().keySet(), "element.references()").
+		requireThat(image.referenceToTags().keySet(), "image.references()").
 			isEqualTo(Set.of(EXISTING_IMAGE, "rocket-ship"));
 		it.onSuccess();
 	}
@@ -142,19 +134,10 @@ public final class ImageIT
 		DockerImage image = client.pullImage(EXISTING_IMAGE).apply();
 		requireThat(image, "image").isNotNull();
 
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").size().isEqualTo(1);
-		ImageElement element = images.getFirst();
-		requireThat(element.referenceToTags().keySet(), "element.references()").
-			isEqualTo(Set.of(EXISTING_IMAGE));
-
 		image.addTag("rocket-ship");
-		image.addTag("rocket-ship");
+		image = image.addTag("rocket-ship").reload();
 
-		images = client.listImages();
-		requireThat(images, "images").size().isEqualTo(1);
-		element = images.getFirst();
-		requireThat(element.referenceToTags().keySet(), "element.references()").
+		requireThat(image.referenceToTags().keySet(), "image.references()").
 			isEqualTo(Set.of(EXISTING_IMAGE, "rocket-ship"));
 		it.onSuccess();
 	}
@@ -207,8 +190,9 @@ public final class ImageIT
 		DockerClient client = it.getClient();
 		Path buildContext = Path.of("src/test/resources");
 		DockerImage image = client.buildImage().export(Exporter.dockerImage().build()).apply(buildContext);
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").contains(new ImageElement(image.getId(), Map.of(), Map.of()));
+
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 		it.onSuccess();
 	}
 
@@ -221,8 +205,9 @@ public final class ImageIT
 		DockerImage image = client.buildImage().dockerfile(buildContext.resolve("custom/Dockerfile")).
 			export(Exporter.dockerImage().build()).
 			apply(buildContext);
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").contains(new ImageElement(image.getId(), Map.of(), Map.of()));
+
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 		it.onSuccess();
 	}
 
@@ -252,8 +237,9 @@ public final class ImageIT
 		DockerImage image = client.buildImage().platform("linux/amd64").
 			export(Exporter.dockerImage().build()).
 			apply(buildContext);
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").contains(new ImageElement(image.getId(), Map.of(), Map.of()));
+
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 		it.onSuccess();
 	}
 
@@ -266,8 +252,9 @@ public final class ImageIT
 		DockerImage image = client.buildImage().platform("linux/amd64").platform("linux/arm64").
 			export(Exporter.dockerImage().build()).
 			apply(buildContext);
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").contains(new ImageElement(image.getId(), Map.of(), Map.of()));
+
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 		it.onSuccess();
 	}
 
@@ -277,12 +264,15 @@ public final class ImageIT
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
 		Path buildContext = Path.of("src/test/resources");
-		DockerImage image = client.buildImage().reference("integration-test").export(
-				Exporter.dockerImage().build()).
+		DockerImage image = client.buildImage().reference("integration-test").
+			export(Exporter.dockerImage().build()).
 			apply(buildContext);
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").contains(new ImageElement(image.getId(),
-			Map.of("integration-test", Set.of("latest")), image.referenceToDigest()));
+
+		requireThat(image.referenceToTags(), "image.referenceToTags()").
+			isEqualTo(Map.of("integration-test", Set.of("latest")));
+
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 		it.onSuccess();
 	}
 
@@ -482,8 +472,10 @@ public final class ImageIT
 			export(Exporter.ociImage(tempDirectory.toString()).directory().build()).
 			apply(buildContext);
 		requireThat(image, "image").isNull();
-		List<ImageElement> images = client.listImages();
+
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").isEmpty();
+
 		requireThat(tempDirectory, "tempDirectory").isNotEmpty();
 		it.onSuccess();
 		Paths.deleteRecursively(tempDirectory);
@@ -494,12 +486,12 @@ public final class ImageIT
 	{
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
-		String builder = client.createBuilder().driver(Driver.dockerContainer().build()).
+		Builder.Id builder = client.createBuilder().
+			driver(Driver.dockerContainer().build()).
 			context(it.getName()).
 			apply();
 
 		Path buildContext = Path.of("src/test/resources");
-
 		Path tempDirectory = Files.createTempDirectory("");
 		DockerImage image = client.buildImage().
 			export(Exporter.ociImage(tempDirectory.toString()).directory().build()).
@@ -507,8 +499,11 @@ public final class ImageIT
 			apply(buildContext);
 		requireThat(image, "image").isNull();
 
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").isNotEmpty();
+		// The build driver gets loaded into the local store, but the generated image does not.
+		List<DockerImage> images = client.getImages();
+		DockerImage buildxImage = client.getImage("moby/buildkit:buildx-stable-1");
+		requireThat(images, "images").isEqualTo(List.of(buildxImage));
+
 		requireThat(tempDirectory, "tempDirectory").isNotEmpty();
 		it.onSuccess();
 		Paths.deleteRecursively(tempDirectory);
@@ -529,8 +524,10 @@ public final class ImageIT
 			imageBuilder.platform(platform);
 		DockerImage image = imageBuilder.apply(buildContext);
 		requireThat(image, "image").isNull();
-		List<ImageElement> images = client.listImages();
+
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").isEmpty();
+
 		requireThat(tempDirectory, "tempDirectory").isNotEmpty();
 		it.onSuccess();
 		Paths.deleteRecursively(tempDirectory);
@@ -552,8 +549,10 @@ public final class ImageIT
 			export(Exporter.dockerImage().path(tempFile.toString()).build()).
 			apply(buildContext);
 		requireThat(image, "image").isNull();
-		List<ImageElement> images = client.listImages();
+
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").isEmpty();
+
 		Set<String> entries = getTarEntries(tempFile.toFile());
 		requireThat(entries, "entries").isNotEmpty();
 		it.onSuccess();
@@ -572,7 +571,8 @@ public final class ImageIT
 			export(Exporter.ociImage(tempFile.toString()).build()).
 			apply(buildContext);
 		requireThat(image, "image").isNull();
-		List<ImageElement> images = client.listImages();
+
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").isEmpty();
 
 		Set<String> entries = getTarEntries(tempFile.toFile());
@@ -595,7 +595,8 @@ public final class ImageIT
 			platform("linux/arm64").
 			apply(buildContext);
 		requireThat(image, "image").isNull();
-		List<ImageElement> images = client.listImages();
+
+		List<DockerImage> images = client.getImages();
 		requireThat(images, "images").isEmpty();
 
 		Set<String> entries = getTarEntries(tempFile.toFile());
@@ -618,10 +619,8 @@ public final class ImageIT
 			apply(buildContext);
 		requireThat(image, "image").isNotNull();
 
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").
-			containsExactly(
-				List.of(new ImageElement(image.getId(), image.referenceToTags(), image.referenceToDigest())));
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 
 		Set<String> entries = getTarEntries(tempFile.toFile());
 		requireThat(entries, "entries").isNotEmpty();
@@ -647,10 +646,8 @@ public final class ImageIT
 			apply(buildContext);
 		requireThat(image, "image").isNotNull();
 
-		List<ImageElement> images = client.listImages();
-		requireThat(images, "images").
-			containsExactly(
-				List.of(new ImageElement(image.getId(), image.referenceToTags(), image.referenceToDigest())));
+		List<DockerImage> images = client.getImages();
+		requireThat(images, "images").isEqualTo(List.of(image));
 
 		Set<String> entries = getTarEntries(tempFile.toFile());
 		requireThat(entries, "entries").isNotEmpty();

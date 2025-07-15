@@ -1,7 +1,7 @@
 package io.github.cowwoc.anchor4j.core.internal.resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.cowwoc.requirements12.java.DefaultJavaValidators;
+import io.github.cowwoc.anchor4j.core.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +12,34 @@ import java.util.List;
 import java.util.Set;
 
 import static io.github.cowwoc.requirements12.jackson.DefaultJacksonValidators.requireThat;
+import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
 
 /**
  * Code shared by all parsers.
  */
 public abstract class AbstractParser
 {
+	protected final Client client;
 	protected final Logger log = LoggerFactory.getLogger(AbstractParser.class);
+
+	/**
+	 * Creates a new AbstractParser.
+	 *
+	 * @param client the client configuration
+	 */
+	public AbstractParser(Client client)
+	{
+		assert client != null;
+		this.client = client;
+	}
+
+	/**
+	 * @return the client
+	 */
+	protected Client getClient()
+	{
+		return client;
+	}
 
 	/**
 	 * Returns the {@code int} value of a JSON node.
@@ -34,8 +55,7 @@ public abstract class AbstractParser
 	{
 		JsonNode child = requireThat(parent, "parent").property(name).getValue();
 		requireThat(child, name).isIntegralNumber();
-		DefaultJavaValidators.requireThat(child.canConvertToInt(), name + ".canConvertToInt()").withContext(child,
-			"child").isTrue();
+		requireThat(child.canConvertToInt(), name + ".canConvertToInt()").withContext(child, "child").isTrue();
 		return child.intValue();
 	}
 

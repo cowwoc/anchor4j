@@ -8,10 +8,11 @@ import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesCrea
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesCreator.NodePoolBuilder;
 import io.github.cowwoc.anchor4j.digitalocean.kubernetes.resource.KubernetesVersion;
 import io.github.cowwoc.anchor4j.digitalocean.network.resource.Region;
+import io.github.cowwoc.requirements12.annotation.CheckReturnValue;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 /**
@@ -33,14 +34,14 @@ public interface KubernetesClient extends DigitalOceanClient
 	/**
 	 * Returns all the Kubernetes clusters.
 	 *
-	 * @return an empty set if no match is found
+	 * @return an empty list if no match is found
 	 * @throws IllegalStateException if the client is closed
 	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
 	 *                               the request may resolve the issue.
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Set<Kubernetes> getKubernetes() throws IOException, InterruptedException, TimeoutException;
+	List<Kubernetes> getKubernetesClusters() throws IOException, InterruptedException;
 
 	/**
 	 * Returns the first Kubernetes cluster that matches a predicate.
@@ -54,7 +55,8 @@ public interface KubernetesClient extends DigitalOceanClient
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Kubernetes getKubernetes(Predicate<Kubernetes> predicate) throws IOException, InterruptedException;
+	List<Kubernetes> getKubernetesClusters(Predicate<Kubernetes> predicate)
+		throws IOException, InterruptedException;
 
 	/**
 	 * Looks up a Kubernetes cluster by its ID.
@@ -68,7 +70,21 @@ public interface KubernetesClient extends DigitalOceanClient
 	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
 	 *                               due to shutdown signals.
 	 */
-	Kubernetes getKubernetes(Id id) throws IOException, InterruptedException;
+	Kubernetes getKubernetesCluster(Id id) throws IOException, InterruptedException;
+
+	/**
+	 * Returns the first Kubernetes cluster that matches a predicate.
+	 *
+	 * @param predicate the predicate
+	 * @return null if no match is found
+	 * @throws NullPointerException  if {@code predicate} is null
+	 * @throws IllegalStateException if the client is closed
+	 * @throws IOException           if an I/O error occurs. These errors are typically transient, and retrying
+	 *                               the request may resolve the issue.
+	 * @throws InterruptedException  if the thread is interrupted while waiting for a response. This can happen
+	 *                               due to shutdown signals.
+	 */
+	Kubernetes getKubernetesCluster(Predicate<Kubernetes> predicate) throws IOException, InterruptedException;
 
 	/**
 	 * Creates a new Kubernetes cluster.
@@ -82,6 +98,7 @@ public interface KubernetesClient extends DigitalOceanClient
 	 * @throws IllegalArgumentException if any of the arguments contain leading or trailing whitespace or are
 	 *                                  empty
 	 */
-	KubernetesCreator createKubernetes(String name, Region.Id region, KubernetesVersion version,
+	@CheckReturnValue
+	KubernetesCreator createKubernetesCluster(String name, Region.Id region, KubernetesVersion version,
 		Set<NodePoolBuilder> nodePools);
 }

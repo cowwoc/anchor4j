@@ -2,6 +2,8 @@ package io.github.cowwoc.anchor4j.container.core.internal.resource;
 
 import io.github.cowwoc.anchor4j.container.core.internal.client.InternalContainerClient;
 import io.github.cowwoc.anchor4j.container.core.internal.util.ParameterValidator;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder.Id;
 import io.github.cowwoc.anchor4j.container.core.resource.BuilderCreator;
 import io.github.cowwoc.anchor4j.core.internal.util.ToStringBuilder;
 import io.github.cowwoc.anchor4j.core.resource.CommandResult;
@@ -63,7 +65,7 @@ public final class DefaultBuilderCreator implements BuilderCreator
 	}
 
 	@Override
-	public String apply() throws IOException, InterruptedException
+	public Builder.Id apply() throws IOException, InterruptedException
 	{
 		// https://docs.docker.com/reference/cli/docker/buildx/create/
 		List<String> arguments = new ArrayList<>(7);

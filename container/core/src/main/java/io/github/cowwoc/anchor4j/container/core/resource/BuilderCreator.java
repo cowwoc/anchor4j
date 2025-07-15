@@ -53,14 +53,14 @@ public interface BuilderCreator
 	/**
 	 * Creates the builder.
 	 *
-	 * @return the name of the builder
+	 * @return the builder ID
 	 * @throws ContextNotFoundException if the Docker context cannot be found or resolved
 	 * @throws IOException              if an I/O error occurs. These errors are typically transient, and
 	 *                                  retrying the request may resolve the issue.
 	 * @throws InterruptedException     if the thread is interrupted before the operation completes. This can
 	 *                                  happen due to shutdown signals.
 	 */
-	String apply() throws IOException, InterruptedException;
+	Builder.Id apply() throws IOException, InterruptedException;
 
 	/**
 	 * The backend used to execute builds.

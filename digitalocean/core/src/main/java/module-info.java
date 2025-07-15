@@ -15,5 +15,5 @@ module io.github.cowwoc.anchor4j.digitalocean.core
 
 	exports io.github.cowwoc.anchor4j.digitalocean.core.internal.client to
 		io.github.cowwoc.anchor4j.digitalocean.compute, io.github.cowwoc.anchor4j.digitalocean.database,
-		io.github.cowwoc.anchor4j.digitalocean.registry, io.github.cowwoc.anchor4j.digitalocean.kubernetes, io.github.cowwoc.anchor4j.digitalocean.network, io.github.cowwoc.anchor4j.digitalocean.project;
+		io.github.cowwoc.anchor4j.digitalocean.registry, io.github.cowwoc.anchor4j.digitalocean.kubernetes, io.github.cowwoc.anchor4j.digitalocean.network, io.github.cowwoc.anchor4j.digitalocean.project, io.github.cowwoc.anchor4j.digitalocean.driftdetection;
 }

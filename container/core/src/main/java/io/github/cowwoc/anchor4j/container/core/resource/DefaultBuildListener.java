@@ -3,9 +3,10 @@ package io.github.cowwoc.anchor4j.container.core.resource;
 import io.github.cowwoc.anchor4j.container.core.exception.BuilderNotFoundException;
 import io.github.cowwoc.anchor4j.container.core.exception.ContextNotFoundException;
 import io.github.cowwoc.anchor4j.container.core.exception.UnsupportedExporterException;
-import io.github.cowwoc.anchor4j.container.core.internal.resource.BuildXParser;
+import io.github.cowwoc.anchor4j.container.core.internal.parser.BuildXParser;
 import io.github.cowwoc.anchor4j.core.internal.util.Exceptions;
 import io.github.cowwoc.anchor4j.core.internal.util.Processes;
+import io.github.cowwoc.anchor4j.core.internal.util.Threads;
 import io.github.cowwoc.anchor4j.core.resource.CommandResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,12 +102,14 @@ public class DefaultBuildListener implements BuildListener
 		Thread parentThread = Thread.currentThread();
 		this.stdoutThread = Thread.startVirtualThread(() ->
 		{
-			stdoutLog.debug("Spawned by thread \"{}\"", parentThread.getName());
+			Thread currentThread = Thread.currentThread();
+			currentThread.setName(parentThread.getName() + " -> " + Threads.getName(currentThread));
 			Processes.consume(stdoutReader, exceptions, this::onStdoutLine);
 		});
 		this.stderrThread = Thread.startVirtualThread(() ->
 		{
-			stderrLog.debug("Spawned by thread \"{}\"", parentThread.getName());
+			Thread currentThread = Thread.currentThread();
+			currentThread.setName(parentThread.getName() + " -> " + Threads.getName(currentThread));
 			Processes.consume(stderrReader, exceptions, this::onStderrLine);
 		});
 	}

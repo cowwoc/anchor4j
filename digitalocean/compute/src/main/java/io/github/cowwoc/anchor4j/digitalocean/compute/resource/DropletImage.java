@@ -83,7 +83,7 @@ public interface DropletImage
 	 *
 	 * @return the size
 	 */
-	int getSizeInGiB();
+	float getSizeInGiB();
 
 	/**
 	 * Returns a description of the image.
@@ -143,15 +143,19 @@ public interface DropletImage
 	enum Type
 	{
 		/**
+		 * 1-click apps.
+		 */
+		APPLICATION,
+		/**
 		 * Base OS image.
 		 */
 		BASE,
 		/**
-		 * User-generated Droplet snapshot.
+		 * User-generated droplet snapshot.
 		 */
 		SNAPSHOT,
 		/**
-		 * Automatically created Droplet backup.
+		 * Automatically created droplet backup.
 		 */
 		BACKUP,
 		/**

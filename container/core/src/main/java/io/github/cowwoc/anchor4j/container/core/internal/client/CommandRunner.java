@@ -2,6 +2,7 @@ package io.github.cowwoc.anchor4j.container.core.internal.client;
 
 import io.github.cowwoc.anchor4j.core.internal.util.Exceptions;
 import io.github.cowwoc.anchor4j.core.internal.util.Processes;
+import io.github.cowwoc.anchor4j.core.internal.util.Threads;
 import io.github.cowwoc.anchor4j.core.resource.CommandResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +107,8 @@ public final class CommandRunner
 		{
 			Thread stdoutThread = Thread.startVirtualThread(() ->
 			{
-				stdoutLog.debug("Spawned by thread \"{}\"", parentThread.getName());
+				Thread currentThread = Thread.currentThread();
+				currentThread.setName(parentThread.getName() + " -> " + Threads.getName(currentThread));
 				Processes.consume(stdoutReader, exceptions, line ->
 				{
 					stdoutJoiner.add(line);
@@ -117,7 +119,8 @@ public final class CommandRunner
 			});
 			Thread stderrThread = Thread.startVirtualThread(() ->
 			{
-				stderrLog.debug("Spawned by thread \"{}\"", parentThread.getName());
+				Thread currentThread = Thread.currentThread();
+				currentThread.setName(parentThread.getName() + " -> " + Threads.getName(currentThread));
 				Processes.consume(stderrReader, exceptions, line ->
 				{
 					stderrJoiner.add(line);

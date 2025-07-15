@@ -15,8 +15,8 @@ module io.github.cowwoc.anchor4j.container.docker
 	exports io.github.cowwoc.anchor4j.docker.resource;
 
 	exports io.github.cowwoc.anchor4j.docker.internal.util to io.github.cowwoc.anchor4j.container.docker.test;
-	exports io.github.cowwoc.anchor4j.docker.internal.client to
-		io.github.cowwoc.anchor4j.container.docker.test;
+	exports io.github.cowwoc.anchor4j.docker.internal.client to io.github.cowwoc.anchor4j.container.docker.test;
 	exports io.github.cowwoc.anchor4j.docker.internal.resource to
 		io.github.cowwoc.anchor4j.container.docker.test;
+	exports io.github.cowwoc.anchor4j.docker.internal.parser to io.github.cowwoc.anchor4j.container.docker.test;
 }

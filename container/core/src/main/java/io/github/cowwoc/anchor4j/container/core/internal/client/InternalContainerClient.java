@@ -1,7 +1,7 @@
 package io.github.cowwoc.anchor4j.container.core.internal.client;
 
 import io.github.cowwoc.anchor4j.container.core.client.ContainerClient;
-import io.github.cowwoc.anchor4j.container.core.internal.resource.BuildXParser;
+import io.github.cowwoc.anchor4j.container.core.internal.parser.BuildXParser;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImage;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImage.Id;
 

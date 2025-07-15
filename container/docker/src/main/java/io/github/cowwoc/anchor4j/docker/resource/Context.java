@@ -31,6 +31,13 @@ public interface Context
 	}
 
 	/**
+	 * Returns the context's ID.
+	 *
+	 * @return the ID
+	 */
+	Id getId();
+
+	/**
 	 * Returns the context's name.
 	 *
 	 * @return the name

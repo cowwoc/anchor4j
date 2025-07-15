@@ -8,7 +8,6 @@ import io.github.cowwoc.anchor4j.docker.exception.ResourceInUseException;
 import io.github.cowwoc.anchor4j.docker.exception.ResourceNotFoundException;
 import io.github.cowwoc.anchor4j.docker.resource.Container;
 import io.github.cowwoc.anchor4j.docker.resource.Container.Status;
-import io.github.cowwoc.anchor4j.docker.resource.ContainerElement;
 import io.github.cowwoc.anchor4j.docker.resource.DockerImage;
 import io.github.cowwoc.anchor4j.docker.resource.ProcessListener;
 import org.testng.annotations.Test;
@@ -100,7 +99,7 @@ public final class ContainerIT
 	{
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
-		List<ContainerElement> containers = client.listContainers();
+		List<Container> containers = client.getContainers();
 		requireThat(containers, "containers").isEmpty();
 		it.onSuccess();
 	}
@@ -111,13 +110,12 @@ public final class ContainerIT
 		IntegrationTestContainer it = new IntegrationTestContainer();
 		DockerClient client = it.getClient();
 		DockerImage image = client.pullImage(EXISTING_IMAGE).apply();
-		Container container = image.createContainer().apply();
-		List<ContainerElement> containers = client.listContainers();
+		Container container1 = image.createContainer().apply();
+
+		List<Container> containers = client.getContainers();
 		requireThat(containers, "containers").size().isEqualTo(1);
-		ContainerElement element = containers.getFirst();
-		requireThat(element.id(), "element.container.getId()").
-			isEqualTo(container.getId(), "container.getId()");
-		requireThat(element.name(), "element.name()").isEqualTo(container.getName(), "container.getName()");
+		Container container2 = containers.getFirst();
+		requireThat(container1, "container1").isEqualTo(container2, "container2");
 		it.onSuccess();
 	}
 

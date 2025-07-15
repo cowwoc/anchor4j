@@ -11,7 +11,9 @@ module io.github.cowwoc.anchor4j.core
 	requires org.threeten.extra;
 
 	exports io.github.cowwoc.anchor4j.core.client;
+	exports io.github.cowwoc.anchor4j.core.exception;
 	exports io.github.cowwoc.anchor4j.core.id;
+	exports io.github.cowwoc.anchor4j.core.migration;
 	exports io.github.cowwoc.anchor4j.core.resource;
 
 	exports io.github.cowwoc.anchor4j.core.internal.client to
@@ -37,5 +39,5 @@ module io.github.cowwoc.anchor4j.core
 		io.github.cowwoc.anchor4j.digitalocean.core, io.github.cowwoc.anchor4j.digitalocean.compute,
 		io.github.cowwoc.anchor4j.digitalocean.database, io.github.cowwoc.anchor4j.digitalocean.registry,
 		io.github.cowwoc.anchor4j.digitalocean.network, io.github.cowwoc.anchor4j.digitalocean.project,
-		io.github.cowwoc.anchor4j.digitalocean.kubernetes;
+		io.github.cowwoc.anchor4j.digitalocean.kubernetes, io.github.cowwoc.anchor4j.digitalocean.driftdetection;
 }

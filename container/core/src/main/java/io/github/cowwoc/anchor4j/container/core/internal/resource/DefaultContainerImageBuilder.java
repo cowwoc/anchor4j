@@ -4,6 +4,7 @@ import io.github.cowwoc.anchor4j.container.core.internal.client.InternalContaine
 import io.github.cowwoc.anchor4j.container.core.internal.util.ParameterValidator;
 import io.github.cowwoc.anchor4j.container.core.resource.BuildListener;
 import io.github.cowwoc.anchor4j.container.core.resource.BuildListener.Output;
+import io.github.cowwoc.anchor4j.container.core.resource.Builder;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImage;
 import io.github.cowwoc.anchor4j.container.core.resource.ContainerImageBuilder;
 import io.github.cowwoc.anchor4j.container.core.resource.DefaultBuildListener;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,8 +34,7 @@ public class DefaultContainerImageBuilder implements ContainerImageBuilder
 	private final Set<String> tags = new HashSet<>();
 	private final Set<String> cacheFrom = new HashSet<>();
 	private final Set<AbstractExporter> exporters = new LinkedHashSet<>();
-	private boolean loadsIntoImageStore;
-	private String builder = "";
+	private Builder.Id builder;
 	private BuildListener listener = new DefaultBuildListener();
 	private final Logger log = LoggerFactory.getLogger(DefaultContainerImageBuilder.class);
 
@@ -86,14 +87,12 @@ public class DefaultContainerImageBuilder implements ContainerImageBuilder
 		requireThat(exporter, "exporter").isNotNull();
 		AbstractExporter ae = (AbstractExporter) exporter;
 		this.exporters.add(ae);
-		loadsIntoImageStore |= ae.loadsIntoImageStore();
 		return this;
 	}
 
 	@Override
-	public ContainerImageBuilder builder(String builder)
+	public ContainerImageBuilder builder(Builder.Id builder)
 	{
-		ParameterValidator.validateName(builder, "builder");
 		this.builder = builder;
 		return this;
 	}
@@ -116,6 +115,18 @@ public class DefaultContainerImageBuilder implements ContainerImageBuilder
 	public ContainerImage apply(Path buildContext) throws IOException, InterruptedException
 	{
 		List<String> arguments = getArguments(buildContext);
+		Path metadataJson;
+		boolean loadsIntoImageStore = false;
+		for (AbstractExporter exporter : exporters)
+			loadsIntoImageStore |= exporter.loadsIntoImageStore();
+		if (loadsIntoImageStore)
+		{
+			metadataJson = Files.createTempFile("", ".json");
+			arguments.add("--metadata-file");
+			arguments.add(metadataJson.toString());
+		}
+		else
+			metadataJson = null;
 		try
 		{
 			return client.retry(_ ->
@@ -150,7 +161,19 @@ public class DefaultContainerImageBuilder implements ContainerImageBuilder
 		finally
 		{
 			listener.buildCompleted();
+			if (metadataJson != null)
+				Files.delete(metadataJson);
 		}
+	}
+
+	/**
+	 * @return the builder that will be used to build the image
+	 */
+	private Builder getBuilder() throws IOException, InterruptedException
+	{
+		if (builder == null)
+			return client.getDefaultBuilder();
+		return client.getBuilder(builder);
 	}
 
 	/**
@@ -181,7 +204,7 @@ public class DefaultContainerImageBuilder implements ContainerImageBuilder
 
 		// https://docs.docker.com/reference/cli/docker/buildx/build/
 		List<String> arguments = new ArrayList<>(2 + cacheFrom.size() + 2 + 1 + exporters.size() * 2 +
-			tags.size() * 2 + 2 + 2);
+			tags.size() * 2 + 2 + 2 + 1);
 		arguments.add("buildx");
 		arguments.add("build");
 		if (!cacheFrom.isEmpty())
@@ -207,10 +230,10 @@ public class DefaultContainerImageBuilder implements ContainerImageBuilder
 			arguments.add("--tag");
 			arguments.add(tag);
 		}
-		if (!builder.isEmpty())
+		if (builder != null)
 		{
 			arguments.add("--builder");
-			arguments.add(builder);
+			arguments.add(builder.getValue());
 		}
 		arguments.add(absoluteBuildContext.toString());
 		return arguments;

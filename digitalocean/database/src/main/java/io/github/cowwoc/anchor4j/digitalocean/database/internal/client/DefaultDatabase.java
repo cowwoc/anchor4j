@@ -370,7 +370,7 @@ public final class DefaultDatabase implements Database
 	@CheckReturnValue
 	public Database reload() throws IOException, InterruptedException
 	{
-		return client.getDatabase(id);
+		return client.getDatabaseCluster(id);
 	}
 
 	@Override
@@ -399,7 +399,7 @@ public final class DefaultDatabase implements Database
 			}
 			ContentResponse contentResponse = (ContentResponse) serverResponse;
 			JsonNode body = client.getResponseBody(contentResponse);
-			Database newCluster = client.getDatabaseParser().databaseFromServer(client, body.get("database"));
+			Database newCluster = client.getDatabaseParser().databaseFromServer(body.get("database"));
 			if (newCluster.getStatus().equals(status))
 			{
 				if (timeOfLastStatus != Instant.MIN)
@@ -451,7 +451,7 @@ public final class DefaultDatabase implements Database
 			}
 			ContentResponse contentResponse = (ContentResponse) serverResponse;
 			JsonNode body = client.getResponseBody(contentResponse);
-			Database newCluster = parser.databaseFromServer(client, body.get("database"));
+			Database newCluster = parser.databaseFromServer(body.get("database"));
 			if (!timeLimit.getTimeLeft().isPositive())
 				throw new TimeoutException("Operation failed after " + timeLimit.getTimeQuota());
 			Instant now = Instant.now();

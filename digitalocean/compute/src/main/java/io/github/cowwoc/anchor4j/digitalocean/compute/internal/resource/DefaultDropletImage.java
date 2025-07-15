@@ -19,7 +19,7 @@ public final class DefaultDropletImage implements DropletImage
 	private final Set<Region.Id> regions;
 	private final Type type;
 	private final int minDiskSizeInGiB;
-	private final int sizeInGiB;
+	private final float sizeInGiB;
 	private final String description;
 	private final Set<String> tags;
 	private final Status status;
@@ -53,7 +53,7 @@ public final class DefaultDropletImage implements DropletImage
 	 *                                  </ul>
 	 */
 	public DefaultDropletImage(Id id, String slug, String name, String distribution, boolean isPublic,
-		Set<Region.Id> regions, Type type, int minDiskSizeInGiB, int sizeInGiB, String description,
+		Set<Region.Id> regions, Type type, int minDiskSizeInGiB, float sizeInGiB, String description,
 		Set<String> tags, Status status, String errorMessage, Instant createdAt)
 	{
 		requireThat(id, "id").isNotNull();
@@ -135,7 +135,7 @@ public final class DefaultDropletImage implements DropletImage
 	}
 
 	@Override
-	public int getSizeInGiB()
+	public float getSizeInGiB()
 	{
 		return sizeInGiB;
 	}

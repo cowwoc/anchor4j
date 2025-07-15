@@ -161,7 +161,7 @@ public final class DefaultNode implements Node
 	@Override
 	public List<Task> listTasks() throws IOException, InterruptedException
 	{
-		return client.listTasksByNode();
+		return client.getTasksByNode();
 	}
 
 	@Override

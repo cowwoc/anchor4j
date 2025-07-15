@@ -123,6 +123,11 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>anchor4j-digitalocean-project</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>anchor4j-digitalocean-registry</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -314,9 +319,10 @@
 					<configuration>
 						<compilerArgs>
 							<arg>
-								-Xlint:all,-module,-requires-automatic,-requires-transitive-automatic,-missing-explicit-ctor
+								-Xlint:all,-module,-requires-automatic,-requires-transitive-automatic,-missing-explicit-ctor,-preview
 							</arg>
 							<arg>-Xdiags:verbose</arg>
+							<arg>--enable-preview</arg>
 							<arg>-Werror</arg>
 						</compilerArgs>
 					</configuration>
@@ -485,6 +491,7 @@
 								<parallel>methods</parallel>
 								<threadCount>15</threadCount>
 								<forkCount>1C</forkCount>
+								<argLine>-ea --enable-preview</argLine>
 							</configuration>
 						</execution>
 					</executions>
@@ -529,5 +536,6 @@
 		<module>core</module>
 		<module>container</module>
 		<module>digitalocean</module>
+		<module>test</module>
 	</modules>
 </project>

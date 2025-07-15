@@ -7,10 +7,12 @@ import io.github.cowwoc.anchor4j.docker.resource.Node.Reachability;
 import io.github.cowwoc.anchor4j.docker.resource.Node.Role;
 import io.github.cowwoc.anchor4j.docker.resource.Node.Status;
 
-import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.requireThat;
+import java.util.function.Predicate;
+
+import static io.github.cowwoc.requirements12.java.DefaultJavaValidators.that;
 
 /**
- * An element returned by {@link DockerClient#listNodes()}.
+ * The properties used by the predicate in {@link DockerClient#getNodes(Predicate)}.
  *
  * @param id            the node's ID
  * @param hostname      the node's hostname
@@ -43,12 +45,12 @@ public record NodeElement(Id id, String hostname, Role role, boolean leader, Sta
 	 */
 	public NodeElement
 	{
-		requireThat(id, "id").isNotNull();
-		requireThat(hostname, "hostname").doesNotContainWhitespace().isNotEmpty();
-		requireThat(role, "role").isNotNull();
-		requireThat(status, "status").isNotNull();
-		requireThat(reachability, "reachability").isNotNull();
-		requireThat(availability, "availability").isNotNull();
-		requireThat(dockerVersion, "dockerVersion").doesNotContainWhitespace();
+		assert id != null;
+		assert that(hostname, "hostname").doesNotContainWhitespace().isNotEmpty().elseThrow();
+		assert that(role, "role").isNotNull().elseThrow();
+		assert that(status, "status").isNotNull().elseThrow();
+		assert that(reachability, "reachability").isNotNull().elseThrow();
+		assert that(availability, "availability").isNotNull().elseThrow();
+		assert that(dockerVersion, "dockerVersion").doesNotContainWhitespace().elseThrow();
 	}
 }

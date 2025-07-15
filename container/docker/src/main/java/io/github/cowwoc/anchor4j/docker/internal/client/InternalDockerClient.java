@@ -2,14 +2,14 @@ package io.github.cowwoc.anchor4j.docker.internal.client;
 
 import io.github.cowwoc.anchor4j.container.core.internal.client.InternalContainerClient;
 import io.github.cowwoc.anchor4j.docker.client.DockerClient;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ConfigParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ContainerParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ContextParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ImageParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.NetworkParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.NodeParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.ServiceParser;
-import io.github.cowwoc.anchor4j.docker.internal.resource.SwarmParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ConfigParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ContainerParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ContextParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ImageParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.NetworkParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.NodeParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.ServiceParser;
+import io.github.cowwoc.anchor4j.docker.internal.parser.SwarmParser;
 
 /**
  * The internals of a Docker client.
